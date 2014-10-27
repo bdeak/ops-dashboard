@@ -1,0 +1,9 @@
+<!-- the parameters for the logger are set in php/lib/common.php:get_logger() -->
+<configuration xmlns="http://logging.apache.org/log4php/">
+    <appender name="dashboard" class="LoggerAppenderRollingFile">
+    </appender>
+    <root>
+        <level value="DEBUG" />
+        <appender_ref ref="dashboard" />
+    </root>
+</configuration>

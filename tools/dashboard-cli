@@ -1,0 +1,323 @@
+#!/usr/bin/perl
+##############################################################################
+# Configuration
+##############################################################################
+# URL of the nagios-api
+my $dasbhoard_url = "http://example.com/dashboard";
+my $timeout = 20;
+my $default_ttl = "1h";
+# verbosity level
+#my $api_key = "XXX";
+##############################################################################
+# End of Configuration
+##############################################################################
+
+sub print_usage ();
+sub list_messages($);
+sub add_message($$$$);
+sub kill_message($$);
+sub get_user();
+sub set_personnel($$$);
+sub clear_personnel($$);
+
+
+use warnings;
+use strict;
+use Getopt::Long;
+use LWP::UserAgent;
+use JSON;
+use Time::Local;
+
+my %api_urls;
+$api_urls{add_message} = "$dasbhoard_url/php/api/add_message.php";
+$api_urls{get_messages} = "$dasbhoard_url/php/api/get_messages.php";
+$api_urls{kill_message} = "$dasbhoard_url/php/api/kill_message.php";
+$api_urls{set_personnel} = "$dasbhoard_url/php/api/set_personnel.php";
+$api_urls{clear_personnel} = "$dasbhoard_url/php/api/clear_personnel.php";
+
+
+my ($help, $message, $sender, $ttl, $message_id, $list_messages, $verbose, $oncall, $aod, $clear_oncall, $clear_aod);
+
+print_usage() unless (scalar @ARGV);
+
+Getopt::Long::Configure("no_ignore_case");
+GetOptions(
+    "h"   => \$help, "help" => \$help,
+    "v=s" => \$verbose, "verbose=s" => \$verbose,
+    "t=s" => \$timeout, "timeout=s" => \$timeout,
+    "m=s" => \$message, "message=s" => \$message,
+    "t=s" => \$ttl, "ttl=s" => \$ttl,
+    "s=s" => \$sender, "sender=s" => \$sender,
+    "k=s" => \$message_id, "kill-message=s" => \$message_id,
+    "l" => \$list_messages, "list=s" => \$list_messages,
+    "o=s" => \$oncall, "oncall=s" => \$oncall,
+    "a=s" => \$aod, "aod=s" => \$aod,
+    "clear-oncall" => \$clear_oncall,
+    "clear-aod" => \$clear_aod,
+);
+
+if ($help) {
+    print_usage();
+}
+
+if (defined($list_messages)) {
+    # list the currently shown messages
+    list_messages($api_urls{get_messages});
+    exit 0;
+} elsif (defined($message)) {
+    
+    unless (defined($message)) {
+        print "Please provide a message!\n";
+    }
+
+    unless (defined($sender)) {
+        $sender = get_user();
+    }
+
+    unless (defined($ttl)) {
+        $ttl = $default_ttl;
+    }
+    # add a new message
+    my $result = add_message($api_urls{add_message}, $message, $sender, $ttl);
+    if ($result == 1) {
+        print "Message sent successfully\n";
+        exit 0;
+    } else {
+        print "Problem while sending message: $result\n";
+        exit 1;
+    }
+} elsif (defined($message_id)) {
+    # kill message
+    my $result = kill_message($api_urls{kill_message}, $message_id);
+    if ($result eq "OK") {
+        print "Message was deleted successfully\n";
+        exit 0;
+    } else {
+        print "Problem while sending message: $result\n";
+        exit 1;
+    }   
+} elsif (defined($oncall) || (defined($aod))) {
+    my $type = "";
+    my $username = "";
+    if (defined($oncall)) {
+        $type = "oncall";
+        $username = $oncall;
+    } else {
+        $type = "aod";
+        $username = $aod;
+    }
+    my $result = set_personnel($api_urls{set_personnel}, $username, $type);
+    if ($result eq "OK") {
+        print "$type set successfully\n";
+        exit 0;
+    } else {
+        print "Problem while setting $type: $result\n";
+        exit 1;
+    }   
+} elsif (defined($clear_oncall) || defined($clear_aod)) {
+    my $type = "";
+    my $username = "";
+    if (defined($clear_oncall)) {
+        $type = "oncall";
+        $username = $oncall;
+    } else {
+        $type = "aod";
+        $username = $aod;
+    }
+    my $result = clear_personnel($api_urls{clear_personnel}, $type);
+    if ($result eq "OK") {
+        print "$type cleared successfully\n";
+        exit 0;
+    } else {
+        print "Problem while clearing $type: $result\n";
+        exit 1;
+    }   
+}
+
+exit 0; 
+
+###########################################################################
+############################## Subroutines ################################
+###########################################################################
+    
+sub print_usage () {
+    print "Usage: $0 [[-m MESSGAGE -s SENDER -t TTL ] | [ -l ] | [ -k ID ]]\n\n";
+    print " -h|--help               Print this help\n";
+    print "\n";
+    print "Sending messages:\n";
+    print " -m|--message MSG        Message to send\n";
+    print " -s|--sender USER        The username of the sender, will be autodetected if not provided\n";
+    print " -t|--ttl TTL            TTL of the message (can be human readable, eg 1h. The default of $default_ttl will be used if not provided\n";
+    print "\n";
+    print "Listing messages:\n";
+    print " -l|--list               List the messages that are shown\n";
+    print "\n";    
+    print "Killing messages:\n";
+    print " -k|--kill-message ID    The id of the message that is to be killed\n";
+    print "\n";    
+    print "Setting AoD/Oncall:\n";
+    print " -o|--oncall ONCALL      Username/nickname of the Oncall\n";
+    print " -a|--aod AOD            Username/nickname of the AoD (Admin of the Day)\n";
+    print "\n";
+    print "Clearing AoD/Oncall:\n";
+    print " --clear-oncall          Clear the oncall from the database\n";
+    print " --clear-aod             Clear the AoD from the database\n";
+    print "\n";
+    print "\n";
+    exit 1;
+}
+
+sub get_user () {
+    my $user = `who am i`;
+    chomp($user);
+    my @user = split(/\s+/, $user);
+    unless ($user[0]) {
+        # try to get it from whoami
+        my $user = `whoami`;
+        chomp($user);
+        unless ($user) {
+            die("Can't determine the username!");
+        } else {
+            return $user;
+        }
+    } else {
+        return $user[0];
+    }
+}
+
+sub list_messages($) {
+    my $api_url = shift;
+
+    if ($verbose) {
+        print("Getting message list from API '$api_url'\n");
+    }
+
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout($timeout);
+    my $request = HTTP::Request->new(GET => "$api_url");
+    my $response = $ua->request($request);
+    if ($response->is_success) {
+        my @result = @{from_json($response->decoded_content)};
+        if (scalar @result) {
+            printf "%-3s |  %-50s | %-10s | %-25s | %-25s\n", "id", "message", "sender", "sent", "valid_until";
+            printf "-----------------------------------------------------------------------------------------------------------------------------\n";        
+            foreach my $ref_message (@result) {
+                my %message = %{$ref_message};
+                my $sent = scalar(localtime($message{timestamp}));
+                my $valid_until = scalar(localtime($message{valid_until}));
+                printf "%-3s |  %-50s | %-10s | %-25s | %-25s\n", $message{id}, $message{message}, $message{sender}, $sent, $valid_until;
+                
+            }
+        print "\n";            
+        } else {
+            print "There are no messages to show\n";
+        }
+   }
+}
+
+sub add_message($$$$) {
+    my $api_url = shift;
+    my $message = shift;
+    my $sender = shift;
+    my $ttl = shift;
+
+    my %payload;
+    $payload{"msg"} = $message;
+    $payload{"sender"} = $sender;
+    $payload{"ttl"} = $ttl;
+
+    if ($verbose) {
+        print "Sending message to API '$api_url' ...\n";
+    }
+
+    my $payload_json = to_json(\%payload);
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout($timeout);
+    my $request = HTTP::Request->new(POST => "$api_url");
+    $request->content_type("application/json");
+    $request->content($payload_json);
+    my $response = $ua->request($request);
+    if ($response->is_success) {
+        my @result = @{from_json($response->decoded_content)};
+        if ($result[0] eq "OK") {
+            return 1;
+        } else {
+            return $result[1];
+        }
+    } else {
+        return "Error: The HTTP POST request to $api_url has failed with: " . $response->status_line;
+    }
+}
+
+sub kill_message($$) {
+    my $api_url = shift;
+    my $id = shift;
+
+    if ($verbose) {
+        print "Killing message with ID '$id' ...\n";
+    }
+
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout($timeout);
+    my $request = HTTP::Request->new(GET => "$api_url?id=${id}");
+    my $response = $ua->request($request);
+    if ($response->is_success) {
+        my @result = @{from_json($response->decoded_content)};
+        if ($result[0] eq "OK") {
+            return "OK";
+        } else {
+            return $result[1];
+        }
+    } else {
+        return "Error: The HTTP GET request to '$api_url?id=${id}' has failed with: " . $response->status_line;
+    }
+}
+
+sub set_personnel($$$) {
+    my $api_url = shift;
+    my $username = shift;
+    my $type = shift;
+
+    if ($verbose) {
+        print "Setting user '$username' as '$type'...\n";
+    }
+
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout($timeout);
+    my $request = HTTP::Request->new(GET => "$api_url?username=$username&type=$type");
+    my $response = $ua->request($request);
+    if ($response->is_success) {
+        my @result = @{from_json($response->decoded_content)};
+        if ($result[0] eq "OK") {
+            return "OK";
+        } else {
+            return $result[1];
+        }
+    } else {
+        return "Error: The HTTP GET request to '$api_url?username=$username&type=$type' has failed with: " . $response->status_line;
+    }
+}
+
+sub clear_personnel($$) {
+    my $api_url = shift;
+    my $type = shift;
+
+    if ($verbose) {
+        print "Clearing personnel type '$type'...\n";
+    }
+
+    my $ua = LWP::UserAgent->new();
+    $ua->timeout($timeout);
+    my $request = HTTP::Request->new(GET => "$api_url?type=$type");
+    my $response = $ua->request($request);
+    if ($response->is_success) {
+        my @result = @{from_json($response->decoded_content)};
+        if ($result[0] eq "OK") {
+            return "OK";
+        } else {
+            return $result[1];
+        }
+    } else {
+        return "Error: The HTTP GET request to '$api_url?type=$type' has failed with: " . $response->status_line;
+    }
+}
