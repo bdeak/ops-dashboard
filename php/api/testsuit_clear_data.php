@@ -15,6 +15,6 @@ $l->info("Clearing testsuit data");
 try {
 	clear_testsuit_data_sqlite();
 } catch (Exception $e) {
-	handle_error("Failed to add testsuit data to the database: " . $e->getMessage(), "array");
+	handle_error("Failed to clear testsuit data from the database: " . $e->getMessage(), "array");
 }
 print json_encode(Array("OK", "Cleared testsuit data")) . "\n";

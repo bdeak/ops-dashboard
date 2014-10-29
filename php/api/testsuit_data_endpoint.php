@@ -2,7 +2,7 @@
 
 require_once (dirname(__FILE__)."/../lib/sqlite.php");
 require_once (dirname(__FILE__)."/../lib/common.php");
-require_once(dirname(__FILE__)."/../../config/config.php");
+require_once (dirname(__FILE__)."/../../config/config.php");
 require_once (dirname(__FILE__)."/../lib/testsuit/testsuit.php");
 
 

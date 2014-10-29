@@ -24,6 +24,11 @@ $l->info("Received data via 'testsuit_add_data'");
 
 # add the data to the dashboard db
 try {
+	clear_testsuit_data_sqlite();
+} catch (Exception $e) {
+	handle_error("Failed to clear testsuit data from the database: " . $e->getMessage(), "array");
+}
+try {
 	add_testsuit_data_sqlite($data["data"]);
 } catch (Exception $e) {
 	handle_error("Failed to add testsuit data to the database: " . $e->getMessage(), "array");

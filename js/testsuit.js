@@ -75,7 +75,7 @@ $(function() {
             successAction = function(data, status, xhr) {
                 $.each(data, function(index, obj) {
                     $.alert_data.push({priority: obj["priority"], service: obj["service"], host: obj["host"], state: obj["state"]});
-                    $("#data_holder").append("<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>".format(obj["priority"], obj["service"], obj["host"], obj["state"]));
+                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), obj["service"], obj["host"], obj["state"], obj["priority"]));
                 });
             },
 
@@ -89,6 +89,27 @@ $(function() {
             ajaxCall($.dataurl_get, 'GET', null, successAction, errorAction);
     };
 
+    function check_alert_stored(host, service) {
+        for (index in $.alert_data) {
+            if ($.alert_data[index]["host"] == host && $.alert_data[index]["service"] == service) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    function build_row_content(index, service, host, state, priority) {
+        return "<tr id='row-{5}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3} {4}</td></tr>"
+                .format(
+                    index,
+                    service,
+                    host,
+                    state,
+                    '<button type="button" class="close">x</button>',
+                    index
+                );
+    }
+
     $.alert_data = [];
     $.dataurl_send = "{0}/php/api/testsuit_add_data.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
     $.dataurl_get = "{0}/php/api/testsuit_get_data.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
@@ -98,17 +119,39 @@ $(function() {
         get_testsuit_data();
     });
 
+    // catch the delet-row button event
+    $('#data_holder').on("click", "button", function (evt) {
+        // find closest tr and delete it
+        $(this).closest("tr").fadeOut(function() { 
+            var index = parseInt($(this).attr("id").replace(/^row-/, ""));
+            $.alert_data.splice(index-1, 1);
+            console.log($.alert_data);
+            $(this).remove();
+            // change the visible index of all remaining rows
+            $(".valid-data").each(function (index, obj) {
+                $(this).attr("id", "row-" + (index + 1)).find("td").first().html(index + 1);
+            });
+        });
+    });
+
+
     $('#add-data').click(function () {
-        var priority = $("#data_priority").val();
+        //var priority = $("#data_priority").val();
+        var priority = "";
         var service = $("#data_service").val();
         var host = $("#data_host").val();
         var state = $("#data_state").val();
-        if (service.length && host.length) {
-            $.alert_data.push({priority: priority, service: service, host: host, state: state});
-            $("#data_holder").append("<tr class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>".format(priority,service,host,state));
+        if (check_alert_stored(host, service) === false) {
+            if (service.length && host.length) {
+                $.alert_data.push({priority: priority, service: service, host: host, state: state});
+                $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
+            } else {
+                $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
+                $('#alert-modal').modal('show'); 
+            }
         } else {
-            $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
-            $('#alert-modal').modal('show'); 
+            $("#alert-modal .modal-body").html("Service/host combination already added");
+            $('#alert-modal').modal('show');            
         }
     });
 
