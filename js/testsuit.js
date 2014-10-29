@@ -68,6 +68,24 @@ $(function() {
         });
     }
 
+    function init_typeahead(type) {
+        var datasrc = $.map($.alert_data, function(obj, index) {
+            return obj[type];
+        });
+        datasrc = $.unique(datasrc);
+        $("#data_" + type).typeahead("destroy");
+        $('#data_' + type).typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },
+        {
+          name: 'datasrc',
+          displayKey: 'value',
+          source: substringMatcher(datasrc)
+        });
+    };
+
     function get_testsuit_data() {
 
             $.alert_data = $.alert_data || [];
@@ -77,6 +95,11 @@ $(function() {
                     $.alert_data.push({priority: obj["priority"], service: obj["service"], host: obj["host"], state: obj["state"]});
                     $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), obj["service"], obj["host"], obj["state"], obj["priority"]));
                 });
+
+                init_typeahead("service");
+                init_typeahead("host");
+                //init_typeahead("state");
+
             },
 
             errorAction = function (xhr, status, error) {
@@ -108,7 +131,33 @@ $(function() {
                     '<button type="button" class="close">x</button>',
                     index
                 );
-    }
+    };
+
+    var substringMatcher = function(strs) {
+        return function findMatches(q, cb) {
+        
+            var matches, substrRegex;
+         
+            // an array that will be populated with substring matches
+            matches = [];
+         
+            // regex used to determine if a string contains the substring `q`
+            substrRegex = new RegExp(q, 'i');
+         
+            // iterate through the pool of strings and for any string that
+            // contains the substring `q`, add it to the `matches` array
+            $.each(strs, function(i, str) {
+              if (substrRegex.test(str)) {
+                // the typeahead jQuery plugin expects suggestions to a
+                // JavaScript object, refer to typeahead docs for more info
+                matches.push({ value: str });
+              }
+            });
+         
+            cb(matches);
+        };
+    };
+
 
     $.alert_data = [];
     $.dataurl_send = "{0}/php/api/testsuit_add_data.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
@@ -117,6 +166,7 @@ $(function() {
 
     $(document).ready(function () {
         get_testsuit_data();
+        $('.selectpicker').selectpicker();
     });
 
     // catch the delet-row button event
@@ -145,6 +195,9 @@ $(function() {
             if (service.length && host.length) {
                 $.alert_data.push({priority: priority, service: service, host: host, state: state});
                 $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
+                init_typeahead("service");
+                init_typeahead("host");
+                //init_typeahead("state");
             } else {
                 $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
                 $('#alert-modal').modal('show'); 

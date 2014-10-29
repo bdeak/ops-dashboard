@@ -5,10 +5,15 @@
     <title>GenData</title>
     <!-- include the stylesheets -->
     <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/typeahead.css">
+    <!-- http://silviomoreto.github.io/bootstrap-select/ -->
+    <link rel="stylesheet" href="css/bootstrap-select.min.css">
+
 
     <!-- include the needed libraries -->
     <script src="js/jquery-1.11.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-select.min.js"></script>
     <script src="js/underscore-1.5.2.js"></script>
     <script src="js/backbone-1.1.0.js"></script>
     <script src="js/testsuit.js"></script>
@@ -17,6 +22,7 @@
     <script src="js/jquery.actual.js"></script>
     <script src="js/purl.js"></script>
     <script src="js/jquery-ui.min.js"></script>
+    <script src="js/typeahead.bundle.js"></script>
 
     <style>
         .spacer-big {
@@ -59,13 +65,20 @@
         </div>
         -->
         <div class="col-md-3">
-            <input type="text" id="data_service" class="form-control" placeholder="Service">
+            <input type="text" id="data_service" class="typeahead form-control" placeholder="Service">
         </div>            
         <div class="col-md-2">
-            <input type="text" id="data_host" class="form-control" placeholder="Host">
+            <input type="text" id="data_host" class="typeahead form-control" placeholder="Host">
         </div>            
-        <div class="col-md-2">            
-            <input type="text" id="data_state" class="form-control" value="warning">
+        <div class="col-md-2">     
+            <select id="data_state" class="selectpicker" data-width="auto">
+                <option value="critical" selected>critical</option>
+                <option value="warning">warning</option>
+                <option value="unknown">unknown</option>
+                <option value="down">down</option>
+            </select>
+
+           <!-- <input type="text" id="data_state" class="typeahead form-control" value="warning">-->
         </div>
         <div class="col-md-4 btn-group">
         <button type="button" id="add-data" class="btn btn-default">Add new entry</button>
