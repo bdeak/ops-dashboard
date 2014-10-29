@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <meta charset="utf-8">
+    <title>GenData</title>
+    <!-- include the stylesheets -->
+    <link rel="stylesheet" href="css/bootstrap.css">
+
+    <!-- include the needed libraries -->
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/underscore-1.5.2.js"></script>
+    <script src="js/backbone-1.1.0.js"></script>
+    <script src="js/testsuit.js"></script>
+    <!-- jquery plugins -->
+    <script src="js/jquery.md5.js"></script>
+    <script src="js/jquery.actual.js"></script>
+    <script src="js/purl.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+
+    <style>
+        .spacer-big {
+            margin-bottom: 100px;
+        }
+
+        .spacer {
+            margin-bottom: 50px;
+        }
+    </style>
+  
+  </head>
+
+  <body>
+    <div class="container">  
+      <h1>Operations Dashboard Testsuit</h1>
+      <div class="spacer-big"></div>
+      <form name="data">
+        <div class="row">
+        <div class="col-md-1">
+            <input type="text" id="data_priority" class="form-control" placeholder="Priority">
+        </div>
+        <div class="col-md-3">
+            <input type="text" id="data_service" class="form-control" placeholder="Service">
+        </div>            
+        <div class="col-md-2">
+            <input type="text" id="data_host" class="form-control" placeholder="Host">
+        </div>            
+        <div class="col-md-2">            
+            <input type="text" id="data_state" class="form-control" value="warning">
+        </div>
+        <div class="col-md-4 btn-group">
+        <button type="button" id="add-data" class="btn btn-default">Add new entry</button>
+        <button type="button" id="send-data" class="btn btn-success">Send Data</button>
+        <button type="button" id="clear-data" class="btn btn-danger">Clear testsuit</button>
+        </div>
+      </form>
+      </div>
+      <div class="spacer"></div>
+      <div id='everything'>
+        <table id="data_holder" class="table table-hover">
+            <tr>
+                <th>Priority</th>
+                <th>Service</th>
+                <th>Host</th>
+                <th>State</th>
+            </tr>
+        </table>
+
+    <!-- Small modal -->
+    <div id="alert-modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">x</button>
+                <h4 class="modal-title" id="mySmallModalLabel">Information</h4>
+            </div>
+            <div class="modal-body">
+            ...
+            </div>
+        </div>
+      </div>
+    </div>        
+    </div>
+  </body>
+</html>

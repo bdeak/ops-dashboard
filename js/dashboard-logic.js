@@ -42,10 +42,10 @@ $(function() {
         // if there's an active alert, show a tag
         if (object["alert_active"]) {
           // show that there's an active alert triggered
-          msg += '    <span class="dashtag dragable alert_active blink">Alert active</span>\n';
+          msg += '    <span class="dashtag dragable alert_active blink">alert active</span>\n';
         } else {
           // hide the alert tag using the 'hidden' css class.. this is needed for easier removal/adding of the tag
-          msg += '    <span class="dashtag dragable alert_active hidden">Alert active</span>\n';
+          msg += '    <span class="dashtag dragable alert_active hidden">alert active</span>\n';
         }
         if (object["is_flapping"]) {
           msg += '    <span class="dashtag dragable is_flapping">flapping</span>\n';
@@ -469,7 +469,6 @@ $(function() {
             $.frame_manager_infobar.queue_add("detect_display_options", element);
           }
         }
-        //console.log("end");
     };
 
     // change markup to real html code
@@ -717,7 +716,6 @@ $(function() {
     // the rest is done via media queries in style.css
     // fixme: make this more clever, maybe dynamic?
     function detect_display_options(columns_override, sim, infobar) {
-      //console.log("called from " + arguments.callee.caller.toString());
       var proposed_columns = parseInt($.url().param('columns')) || parseInt(columns_override) || $.columns || parseInt($.config["layout"]["columns_default"]);
       var simulate = false;
       if (_.isBoolean(sim))
@@ -1097,14 +1095,14 @@ $(function() {
           if ($.tiles_total > $.tiles_max) {
             // need to add more columns
             if ($.columns < (parseInt($.config["layout"]["columns_default"]) + $.config["layout"]["add_more_columns_max_growth"])) {
-              console.log("adding more columns, from {0} to {1}".format($.columns, $.columns+1));
+              console.debug("adding more columns, from {0} to {1}".format($.columns, $.columns+1), "debug");
               detect_display_options($.columns+1);
             }
           } else {
             var proposed_geometry = detect_display_options($.columns - 1, true);
             if (($.columns > parseInt($.config["layout"]["columns_default"])) && ($.tiles_total <= proposed_geometry.tiles_max)) {
               // we can remove a column
-              console.log("reducing the number of columns, from {0} to {1}".format($.columns, $.columns-1));
+              console.debug("reducing the number of columns, from {0} to {1}".format($.columns, $.columns-1), "debug");
               detect_display_options($.columns-1);
             }
           }  
