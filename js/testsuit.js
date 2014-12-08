@@ -25,25 +25,25 @@ $(function() {
     };
 
     function ajaxCall(url, type, data, success, error, complete) {
-        if (success != undefined) {
+        if (success !== undefined) {
             // use the defined success action is provided
             successAction = success;
         } else {
             // use the default action if not provided
             successAction = function(data, status, xhr) {
-            }
+            };
         }
 
-        if (error != undefined) {
+        if (error !== undefined) {
             // use the defined success action is provided
             errorAction = error;
         } else {
             // use the default action if not provided
             errorAction = function (xhr, status, error) {
-            }
+            };
         }
         
-        if (complete != undefined) {
+        if (complete !== undefined) {
             // use the defined success action is provided
             completeAction = complete;
         } else {
@@ -84,7 +84,7 @@ $(function() {
           displayKey: 'value',
           source: substringMatcher(datasrc)
         });
-    };
+    }
 
     function get_testsuit_data() {
 
@@ -92,15 +92,15 @@ $(function() {
 
             successAction = function(data, status, xhr) {
                 $.each(data, function(index, obj) {
-                    $.alert_data.push({priority: obj["priority"], service: obj["service"], host: obj["host"], state: obj["state"]});
-                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), obj["service"], obj["host"], obj["state"], obj["priority"]));
+                    $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state});
+                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), obj.service, obj.host, obj.state, obj.priority));
                 });
 
                 init_typeahead("service");
                 init_typeahead("host");
                 //init_typeahead("state");
 
-            },
+            };
 
             errorAction = function (xhr, status, error) {
               var statuscode = xhr.status;
@@ -110,16 +110,16 @@ $(function() {
             };
 
             ajaxCall($.dataurl_get, 'GET', null, successAction, errorAction);
-    };
+    }
 
     function check_alert_stored(host, service) {
-        for (index in $.alert_data) {
-            if ($.alert_data[index]["host"] == host && $.alert_data[index]["service"] == service) {
+        for (var index in $.alert_data) {
+            if ($.alert_data[index].host == host && $.alert_data[index].service == service) {
                 return true;
             }
         }
         return false;
-    };
+    }
 
     function build_row_content(index, service, host, state, priority) {
         return "<tr id='row-{5}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3} {4}</td></tr>"
@@ -131,7 +131,7 @@ $(function() {
                     '<button type="button" class="close">x</button>',
                     index
                 );
-    };
+    }
 
     var substringMatcher = function(strs) {
         return function findMatches(q, cb) {
@@ -243,7 +243,7 @@ $(function() {
             successAction = function(data, status, xhr) {
                 $.alert_data = [];
                 $("#data_holder").find("tr:gt(0)").fadeOut(function() { $(this).remove(); });
-            },
+            };
 
             errorAction = function (xhr, status, error) {
               var statuscode = xhr.status;
