@@ -8,9 +8,7 @@
   text-align: left;
 }
 
-.typeahead,
-.tt-query,
- {
+.typeahead.tt-query {
   width: 396px;
   height: 30px;
   padding: 8px 12px;
@@ -71,3 +69,4 @@
 .tt-suggestion p {
   margin: 0;
 }
+

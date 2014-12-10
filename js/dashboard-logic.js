@@ -774,8 +774,8 @@ $(function() {
         $.rows = proposed_rows;
         $.tiles_max = proposed_tiles_max;
   
-        console.debug("detected sizes: tile size: {0}x{1} / columns: {2} / rows: {3} / tiles_max: {4} / aspect_ratio: {5}x1 / footer: {6}"
-          .format($.tile_sizex, $.tile_sizey, $.columns, $.rows, $.tiles_max, $.tile_sizex/$.tile_sizey, footer_size));
+        console.debug("screen size: {7}x{8} detected sizes: tile size: {0}x{1} / columns: {2} / rows: {3} / tiles_max: {4} / aspect_ratio: {5}x1 / footer: {6}"
+          .format($.tile_sizex, $.tile_sizey, $.columns, $.rows, $.tiles_max, $.tile_sizex/$.tile_sizey, footer_size, screen_sizex, screen_sizey));
         var free_space = Math.floor(screen_sizey - footer_size - header_height - (proposed_rows) * ((proposed_tile_sizey) + proposed_margin));
         // make animations quicker if the size of the frame is bigger
         $.queue_tick_time = 100 * 3 - ($.columns-2) * 50;

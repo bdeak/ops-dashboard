@@ -64,7 +64,7 @@ function get_data($url, $user=null, $password=null) {
 		$result["success"] = false;
         // load the HTTP codes
         $http_codes = parse_ini_file("errorcodes.txt");
-       	$result["data"] = $info['http_code'] . "/" . $http_codes[$info['http_code']];
+       	$result["data"] = "URL: " . $url . ", status: " .$info['http_code'] . "/" . $http_codes[$info['http_code']];
     
     } else {
     	$result["success"] = true;

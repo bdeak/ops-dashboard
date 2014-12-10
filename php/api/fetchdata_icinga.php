@@ -109,7 +109,13 @@ if ($statuses !== false) {
 	foreach (array("service", "host") as $type) {
 		# failed to retrieve from cache, get it from the URL
 		$l->debug("Getting " . $type . " status data from the icinga URL...");
-		$data_icinga = get_data($config[$type . "_status_url"], $config["icinga_username"], $config["icinga_password"]);
+		$username = null;
+		$password = null;
+		if ((array_key_exists("icinga_username", $config) && (array_key_exists("icinga_password", $config)))) {
+			$username = $config["icinga_username"];
+			$password = $config["icinga_password"];
+		}
+		$data_icinga = get_data($config[$type . "_status_url"], $username, $password);
 		if ($data_icinga["success"] === false) {
 			// handle error
 			handle_error("Failed to fetch data from icinga: " . $data_icinga["data"]);

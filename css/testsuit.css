@@ -1,0 +1,36 @@
+.spacer-big {
+    margin-bottom: 100px;
+}
+
+.spacer {
+    margin-bottom: 50px;
+}
+
+.medium-wide {
+    margin-left: 20%;
+    margin-right: 20%;
+    width: 60%;
+}
+
+.wide {
+    margin-left: 5%;
+    margin-right: 5%;
+    width: 90%;     
+}
+
+h1 {
+    text-align: center;
+}
+
+.inline {
+    display: inline;
+}
+
+.medium {
+    width: 600px;
+}
+
+.formsize {
+    width: 300px;
+    vertical-align: middle;
+}

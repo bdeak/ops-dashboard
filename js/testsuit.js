@@ -166,7 +166,7 @@ $(function() {
 
     $(document).ready(function () {
         get_testsuit_data();
-        $('.selectpicker').selectpicker();
+        $('.selectpicker').selectpicker();       
     });
 
     // catch the delet-row button event
@@ -185,26 +185,81 @@ $(function() {
     });
 
 
+    //$('#add-data').click(function () {
+    //    //var priority = $("#data_priority").val();
+    //    var priority = "";
+    //    var service = $("#data_service").val();
+    //    var host = $("#data_host").val();
+    //    var state = $("#data_state").val();
+    //    if (check_alert_stored(host, service) === false) {
+    //        if (service.length && host.length) {
+    //            $.alert_data.push({priority: priority, service: service, host: host, state: state});
+    //            $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
+    //            init_typeahead("service");
+    //            init_typeahead("host");
+    //            //init_typeahead("state");
+    //        } else {
+    //            $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
+    //            $('#alert-modal').modal('show'); 
+    //        }
+    //    } else {
+    //        $("#alert-modal .modal-body").html("Service/host combination already added");
+    //        $('#alert-modal').modal('show');            
+    //    }
+    //});
+
     $('#add-data').click(function () {
         //var priority = $("#data_priority").val();
         var priority = "";
-        var service = $("#data_service").val();
-        var host = $("#data_host").val();
+        var service_pattern = $("#data_service").val();
+        var host_pattern = $("#data_host").val();
         var state = $("#data_state").val();
-        if (check_alert_stored(host, service) === false) {
-            if (service.length && host.length) {
-                $.alert_data.push({priority: priority, service: service, host: host, state: state});
-                $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
-                init_typeahead("service");
-                init_typeahead("host");
-                //init_typeahead("state");
-            } else {
-                $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
-                $('#alert-modal').modal('show'); 
-            }
+        var num_to_add = $("#data_number_to_add").val();
+        var num_services;
+        var num_hosts;
+
+        // check if both patterns are filled
+        if (!(service_pattern.length && host_pattern.length)) {
+            $("#alert-modal .modal-body").html("Please provide a value for 'Service pattern' and 'Host pattern'");
+            $('#alert-modal').modal('show');
+            return false;
+        }
+
+        // check how many of the hosts/services we need
+        if (service_pattern.match(/_$/)) {
+            num_services = num_to_add;
         } else {
-            $("#alert-modal .modal-body").html("Service/host combination already added");
-            $('#alert-modal').modal('show');            
+            num_services = 1;
+        }
+
+        if (host_pattern.match(/_$/)) {
+            num_hosts = num_to_add;
+        } else {
+            num_hosts = 1;
+        }    
+
+        // generate the hosts/services
+        var ignored_counter = 0;
+        for (var host_counter = 0 ; host_counter < num_hosts ; host_counter++) {
+            for (var service_counter = 0 ; service_counter < num_services ; service_counter++) {
+                var host = host_pattern.replace(/_$/, host_counter);
+                var service = service_pattern.replace(/_$/, service_counter);
+
+                if (check_alert_stored(host, service) === false) {
+                        $.alert_data.push({priority: priority, service: service, host: host, state: state});
+                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
+                        init_typeahead("service");
+                        init_typeahead("host");
+                        //init_typeahead("state");
+                } else {
+                    ignored_counter++;
+                }
+            }
+        }
+        if (ignored_counter) {
+            $("#alert-modal .modal-body").html("Some Service/host combinations were already added, these have been ignored");
+            $('#alert-modal').modal('show');  
+            return false; 
         }
     });
 

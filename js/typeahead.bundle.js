@@ -750,12 +750,12 @@
             },
             input: {
                 position: "relative",
-                verticalAlign: "top",
+                verticalAlign: "middle",
                 backgroundColor: "transparent"
             },
             inputWithNoHint: {
                 position: "relative",
-                verticalAlign: "top"
+                verticalAlign: "middle"
             },
             dropdown: {
                 position: "absolute",
