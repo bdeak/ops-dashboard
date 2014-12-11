@@ -1,4 +1,5 @@
 sftp-config.json
 config/config.php
+config/config.mailapps.php
 todo.txt
 .banned_patterns
