@@ -232,9 +232,13 @@ var TileManager = Backbone.View.extend(
           } else if (type == "adjust_size") {
               // change the size of the grid, adjust the side margins and tile text also
               this.adjust_size(element);
-          } else if (type == "manage_columns") {
-              // add/remove columns if necessary
-              element.func_name();
+          } else if (type == "external_function") {
+              if (element.parameters && element.parameters.length) {
+                // http://stackoverflow.com/questions/2856059/passing-an-array-as-a-function-parameter-in-javascript
+                element.func_name.apply(this, element.parameters);
+              } else {
+                element.func_name(element.parameters);
+              }
               this.start_queue_processing();
           } else if (type == "reposition") {
               this.resize_all_frames(element.animate, element.gravity);

@@ -366,7 +366,7 @@ $(function() {
               func_name: detect_display_options,
               parameters: [null, null, true],
             }
-            $.frame_manager_infobar.queue_add("detect_display_options", element);
+            $.frame_manager_infobar.queue_add("external_function", element);
           }
 
           // add the tile if it doesn't exist already
@@ -408,7 +408,7 @@ $(function() {
               func_name: detect_display_options,
               parameters: [null, null, true],            
             }
-            $.frame_manager_infobar.queue_add("detect_display_options", element);
+            $.frame_manager_infobar.queue_add("external_function", element);
 
             for (var id in $.user_msg_data) {
               var message = add_markup("{0} <span style='font-size:0.7em;'>[{1}]</span>".format($.user_msg_data[id]["message"], $.user_msg_data[id]['sender']));
@@ -466,7 +466,7 @@ $(function() {
               func_name: detect_display_options,
               parameters: [null, null, null],
             }
-            $.frame_manager_infobar.queue_add("detect_display_options", element);
+            $.frame_manager_infobar.queue_add("external_function", element);
           }
         }
     };
@@ -1037,14 +1037,18 @@ $(function() {
           add_new_alerts_if_needed(data_shown);
 
           // show infobar at the bottom if needed
-          show_infobar_if_needed($.monitor_data);
+          //show_infobar_if_needed($.monitor_data);
 
           // update information on alerts currently displayed
           update_alert_information(data_shown);
         } 
 
         // add a queue entry for changing the number of columns - will do anything only if it's needed
-        $.frame_manager.queue_add("manage_columns", {func_name: change_column_number_if_needed});
+        $.frame_manager.queue_add("external_function", {func_name: change_column_number_if_needed});
+        $.frame_manager.queue_add("external_function", {
+          func_name: show_infobar_if_needed,
+          parameters: [ $.monitor_data ],
+        });
 
         // set the next round
         $.myTimeout("worker", worker, 20 * 1000);
@@ -1095,14 +1099,14 @@ $(function() {
           if ($.tiles_total > $.tiles_max) {
             // need to add more columns
             if ($.columns < (parseInt($.config["layout"]["columns_default"]) + $.config["layout"]["add_more_columns_max_growth"])) {
-              console.debug("adding more columns, from {0} to {1}".format($.columns, $.columns+1), "debug");
+              console.debug("adding more columns, from {0} to {1}".format($.columns, $.columns+1));
               detect_display_options($.columns+1);
             }
           } else {
             var proposed_geometry = detect_display_options($.columns - 1, true);
             if (($.columns > parseInt($.config["layout"]["columns_default"])) && ($.tiles_total <= proposed_geometry.tiles_max)) {
               // we can remove a column
-              console.debug("reducing the number of columns, from {0} to {1}".format($.columns, $.columns-1), "debug");
+              console.debug("reducing the number of columns, from {0} to {1}".format($.columns, $.columns-1));
               detect_display_options($.columns-1);
             }
           }  
