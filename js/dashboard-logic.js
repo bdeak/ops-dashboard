@@ -1101,21 +1101,19 @@ $(function() {
             // start from the maximum allowed number of columns and go down from there
             for (var i = 1 ; i <= parseInt($.config["layout"]["add_more_columns_max_growth"]) ; i++) {
               var proposed_geometry = detect_display_options($.columns + i, true);
-              console.log("here");
               if ($.tiles_total <= proposed_geometry.tiles_max) {
-                console.log("here2");
                 // this size is enough
-                console.debug("adding more columns, from {0} to {1}".format($.columns, $.columns+i));
+                console.debug("scaling to more columns, from {0} to {1}".format($.columns, $.columns+i));
                 detect_display_options($.columns + i);
                 break;
               } else {
                 // need to grow further
                 if (i != parseInt($.config["layout"]["add_more_columns_max_growth"])) {
-                  console.log("need to grow further");
+                  // console.log("need to grow further");
                 } else {
                   // not allowed to grow further
                   detect_display_options($.columns + i);
-                  console.log("can't grow further");
+                  // console.log("can't grow further");
                   break;
                 }
               }
@@ -1137,28 +1135,6 @@ $(function() {
         }
       }
     }
-
-    //function change_column_number_if_needed() {
-    //  if ($.config["layout"]["add_more_columns"] === true) {
-    //    if (! $.url().param('columns')) {
-    //      // if the number of not shown tiles is bigger than the max + 10
-    //      if ($.tiles_total > $.tiles_max) {
-    //        // need to add more columns
-    //        if ($.columns < (parseInt($.config["layout"]["columns_default"]) + $.config["layout"]["add_more_columns_max_growth"])) {
-    //          console.debug("adding more columns, from {0} to {1}".format($.columns, $.columns+1));
-    //          detect_display_options($.columns+1);
-    //        }
-    //      } else {
-    //        var proposed_geometry = detect_display_options($.columns - 1, true);
-    //        if (($.columns > parseInt($.config["layout"]["columns_default"])) && ($.tiles_total <= proposed_geometry.tiles_max)) {
-    //          // we can remove a column
-    //          console.debug("reducing the number of columns, from {0} to {1}".format($.columns, $.columns-1));
-    //          detect_display_options($.columns-1);
-    //        }
-    //      }  
-    //    }     
-    //  }
-    //};
 
     // if memory leak, this should be the first place to look!
     function blink() {
