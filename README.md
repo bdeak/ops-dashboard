@@ -1,13 +1,6 @@
-ops-dashboard
+Ops-dashboard
 =============
 
-Operations Dashboard to display alert information from Icinga/Nagios/Thruk
+See the project homepage at <http://bdeak.github.io/ops-dashboard/>
 
-Requirements
-log4php
-	http://logging.apache.org/log4php/install.html
-	pear channel-discover pear.apache.org/log4php
-	pear install log4php/Apache_log4php
-php-apc
-php5-curl
-php5-sqlite
+The documentation can be found in the [Wiki](https://github.com/bdeak/ops-dashboard/wiki)
