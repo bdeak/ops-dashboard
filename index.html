@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Ops-dashboard : Operations Dashboard to display alert information from Icinga/Nagios/Thruk">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Ops-dashboard</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/bdeak/ops-dashboard">View on GitHub</a>
+
+          <h1 id="project_title">Ops-dashboard</h1>
+          <h2 id="project_tagline">Operations Dashboard to display alert information from Icinga/Nagios/Thruk</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/bdeak/ops-dashboard/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/bdeak/ops-dashboard/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a id="what-is-ops-dashboard" class="anchor" href="#what-is-ops-dashboard" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is Ops-dashboard?</h3>
+
+<p>Currently the Operations side of the IT industry is lacking a good dashboard implementation that allows displaying alert data in a meaningful way on a big display.</p>
+
+<p>This project aims to fill this gap, using an HTML/Javascript/PHP based solution that gets it's information from Icinga/Nagios's JSON output possibility.</p>
+
+<p>FIXME: link to documentation</p>
+
+<h3>
+<a id="goals-of-athe-dashboard" class="anchor" href="#goals-of-athe-dashboard" aria-hidden="true"><span class="octicon octicon-link"></span></a>Goals of a/the dashboard</h3>
+
+<p>Such a dashboard can be useful in multiple use cases, by primary goal is to be used as a wallboard, displayed on a big LCD screen in the operations team's office, however there's a valid need for an in-browser use case as well, allowing a quick overview of the system, even from remote locations.</p>
+
+<p>The Ops-dashboard is organized around tiles, with each tile representing a check/alert. The tiles are organized in a queue, which is wrapped to multiple columns and rows, depending on the size of the browser window and the number of alerts that currently needs to be displayed.</p>
+
+<p>The dashboard is using a completely dynamic layout using DOM manipulation, therefore it requires no refreshes of the browser page to display information. As a service returns to an OK state, the tile is removed using an animation sequence which allows the Operations staff to better understand how the states are changing in their systems.</p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<h4>
+<a id="wallboard-display" class="anchor" href="#wallboard-display" aria-hidden="true"><span class="octicon octicon-link"></span></a>Wallboard display</h4>
+
+<ul>
+<li>Information is highly visible by automatically scaling to target resolution</li>
+<li>dynamic layout and animations show to visualize the state changes of the services, no page refresh needed</li>
+<li>Show On-call/admin of the day in the header</li>
+<li>Track when the last "all good" state occured</li>
+<li>Team members may send messages to be displayed at the bottom of the page</li>
+<li>For each alert, show:
+
+<ul>
+<li>Hostname on which the alert occured</li>
+<li>Service name</li>
+<li>Priority, if present</li>
+<li>Service/Host checks, critical/warning/unknown states based on coloring of the tiles</li>
+<li>In the form of tags:</li>
+<li>Soft/Hard state</li>
+<li>how long the alert is present</li>
+<li>is the service flapping?</li>
+</ul>
+</li>
+</ul>
+
+<h4>
+<a id="in-browser-display" class="anchor" href="#in-browser-display" aria-hidden="true"><span class="octicon octicon-link"></span></a>In-browser display</h4>
+
+<ul>
+<li>Fix the number of columns to a pre-defined value to get an overview of what is going on in the system</li>
+<li>Scales automatically to mobile devices - needs some work though</li>
+</ul>
+
+<h4>
+<a id="why-not-show-the-icinganagios-dashboard-page" class="anchor" href="#why-not-show-the-icinganagios-dashboard-page" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why not show the Icinga/Nagios dashboard page?</h4>
+
+<p>Many teams decide to put the icinga dashboard page on their big display, however due to the limitations of that interface it is not really good for showing much information. It refreshes every 60-90 seconds, there is too much information displayed, and when it comes to dashboards, less is definitely more. The font size is too small to see, and if you scale the page up , only a few services can be seen.</p>
+
+<h3>
+<a id="what-technologies-are-used" class="anchor" href="#what-technologies-are-used" aria-hidden="true"><span class="octicon octicon-link"></span></a>What technologies are used?</h3>
+
+<p>There is a set of PHP based backend scripts that fetch the JSON output of icinga/nagios. There is a HTML/JS (<a href="http://jquery.com/">jQuery</a>/<a href="http://jqueryui.com/">jQuery-UI</a>/<a href="http://backbonejs.org/">Backbone</a>/<a href="http://underscorejs.org/">Underscore.js</a>) based page that fetches the information from the PHP backend, and displays it.</p>
+
+<p>Due to the <a href="http://en.wikipedia.org/wiki/Same-origin_policy">same origin policy</a>, the dashboard must be running from the same location as the icinga server's web interface is located on.</p>
+
+<h3>
+<a id="what-are-the-dependencies" class="anchor" href="#what-are-the-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>What are the dependencies</h3>
+
+<p>FIXME</p>
+
+<h3>
+<a id="how-to-install" class="anchor" href="#how-to-install" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to install</h3>
+
+<p>FIXME</p>
+
+<h3>
+<a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demo</h3>
+
+<p>FIXME</p>
+
+<h3>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h3>
+
+<p>FIXME</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Ops-dashboard maintained by <a href="https://github.com/bdeak">bdeak</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
