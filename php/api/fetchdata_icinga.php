@@ -106,6 +106,7 @@ if ($statuses !== false) {
 	# didn't find in the cache, need to download again
 	$statuses = Array();
 	$temp_store = Array();
+	$metadata = Array();
 	foreach (array("service", "host") as $type) {
 		# failed to retrieve from cache, get it from the URL
 		$l->debug("Getting " . $type . " status data from the icinga URL...");
@@ -133,7 +134,22 @@ if ($statuses !== false) {
 			handle_error("Data returned from icinga is incomplete");
 		}
 
-		foreach($content["status"][$type . "_status"] as $key => $value) {
+		# store meta information that comes from icinga
+		foreach (Array("status_data_age", "status_update_interval", "reading_status_data_ok") as $key) {
+			if (!(array_key_exists($key, $metadata))) {
+				$metadata[$key] = $content["icinga_status"][$key];
+			}
+		}
+
+		# status_data_age
+		# status_update_interval
+		# reading_status_data_ok
+		# program_version
+		# program_start / total_running_time
+		# last_external_command_check
+		# notifications_enabled
+
+		foreach ($content["status"][$type . "_status"] as $key => $value) {
 			$host = $value["host_name"];
 			if ($type == "service") {
 				$service = $value["service_description"];
@@ -222,29 +238,26 @@ if ($statuses !== false) {
 			$md5id = md5($k["host"]);
 		}
 
-		#if (!array_key_exists($md5id, $statuses[$type])) {
-		#	$statuses[$type][$md5id] = Array();
-		#}			
-		
-		$statuses[$md5id]["host"] = $k["host"];
+		$statuses["status"][$md5id]["host"] = $k["host"];
 		#$l->debug("host is ". $k['host']);
 		if ($k['type'] == "service") {
-			$statuses[$md5id]["service"] = preg_replace("/_/", " ", $k["service"]);
+			$statuses["status"][$md5id]["service"] = preg_replace("/_/", " ", $k["service"]);
 		}
-		$statuses[$md5id]["status_information"] = $k["status_information"];
-		$statuses[$md5id]["status"] = $k["status"];
-		$statuses[$md5id]["priority"] = $k["priority"];
-		$statuses[$md5id]["duration"] = $k["duration"];
-		$statuses[$md5id]["duration_seconds"] = $k["duration_seconds"];	
-		$statuses[$md5id]["md5id"] = $md5id;
-		$statuses[$md5id]["index"] = $index;
-		$statuses[$md5id]["type"] = $k["type"];
-		$statuses[$md5id]["alert_active"] = $k["alert_active"];
-		$statuses[$md5id]["is_flapping"] = $k["is_flapping"];
-		$statuses[$md5id]["is_soft"] = $k["is_soft"];
+		$statuses["status"][$md5id]["status_information"] = $k["status_information"];
+		$statuses["status"][$md5id]["status"] = $k["status"];
+		$statuses["status"][$md5id]["priority"] = $k["priority"];
+		$statuses["status"][$md5id]["duration"] = $k["duration"];
+		$statuses["status"][$md5id]["duration_seconds"] = $k["duration_seconds"];	
+		$statuses["status"][$md5id]["md5id"] = $md5id;
+		$statuses["status"][$md5id]["index"] = $index;
+		$statuses["status"][$md5id]["type"] = $k["type"];
+		$statuses["status"][$md5id]["alert_active"] = $k["alert_active"];
+		$statuses["status"][$md5id]["is_flapping"] = $k["is_flapping"];
+		$statuses["status"][$md5id]["is_soft"] = $k["is_soft"];
 
 		$index += 1;
 	}
+	$statuses["metadata"] = $metadata;
 	# check again to see if it hasn't been put there by another process
 	$result = apc_delete(get_apc_hash_key("status"));
 	if ($result === true) {

@@ -154,3 +154,13 @@ $config["user_msg"]["default_ttl"] = 5 * 60;
 # if multiple user messages are to be shown, after how many seconds should they change
 $config["user_msg"]["change_time"] = 30;
 #############################################################################################################
+# show if the frontend failed to perform an update of the interface? (using recoloring the background)
+$config["show_outdated"]["frontend"]["enabled"] = true;
+# how many seconds to allow before showing the alert?
+$config["show_outdated"]["frontend"]["max_time"] = 2 * 60;
+# show if the icinga output has not refreshed recently? (based on status_data_age in JSON output)
+# status_update_interval: 10
+$config["show_outdated"]["icinga"]["enabled"] = true;
+# how many times of "status_update_interval" (also from JSON output) to allow before reporting 
+# an outdated status?
+$config["show_outdated"]["icinga"]["threshold"] = 5;

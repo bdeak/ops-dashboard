@@ -22,7 +22,9 @@ try {
 $result = Array();
 $result["cgi_json_version"] = "1.10.0-testsuit";
 $result["icinga_status"] = Array(
-	"status_data_age" => 1, #FIXME
+	"status_data_age" => 10, #FIXME
+	"status_update_interval" => 1,
+	"reading_status_data_ok" => 1,
 );
 $result["status"] = Array();
 $result["status"]["service_status"] = Array();

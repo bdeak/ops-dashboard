@@ -945,7 +945,7 @@ $(function() {
       // check if alert on freshness should be displayed
       function check_data_freshness() {
         var now = new Date().getTime() / 1000;
-        if ((now - $.alive_timestamp) > 2 * 60) { // fixme: make this dynamic
+        if ((now - $.alive_timestamp) > parseInt($.config["show_outdated"]["frontend"]["max_time"])) {
           // make background different color
           // fixme: display popup instead?
           $("body").addClass("outdated");
@@ -991,6 +991,15 @@ $(function() {
           show_error_message(null, $.monitor_data["ERROR"]["message"], true);
           $.myTimeout("worker", worker, 5000);
           return false;
+        }
+
+        if (($.metadata !== null) && ($.config["show_outdated"]["icinga"]["enabled"] === true)) {
+          if ($.metadata["status_data_age"] > $.metadata["status_update_interval"] * parseInt($.config["show_outdated"]["icinga"]["threshold"])) {
+            // data is outdated, show error message
+            show_error_message(null, "Data received from monitoring server is outdated", true);
+            $.myTimeout("worker", worker, 5000);
+            return false;
+          }
         }
 
         // hide the error message, if it was present
@@ -1067,8 +1076,9 @@ $(function() {
     function get_monitor_data() {
 
         successAction = function(data, status, xhr) {
-          $.monitor_data = data;
-          // run detect_dispolay_options() once
+          $.monitor_data = data["status"];
+          $.metadata = data["metadata"];
+          // run detect_display_options() once
           $.once_detectdisplay_monitordata();
         };
 
@@ -1081,15 +1091,11 @@ $(function() {
         // when completed, call another loop for the worker
         completeAction = function() {
           // set the next loop, while making sure only one instance of the worker is running
-          if ($.timer_get_monitor_data == null) {
-            //$.worker_skip_counter = 0;
-            $.timer_get_monitor_data = setTimeout(function() { get_monitor_data(); }, 1000 * 10);
-          }
+          $.myTimeout("get_monitor_data", get_monitor_data, 10 * 1000);
         };
 
         // do the ajax call
         ajaxCall($.monitor_dataurl, 'GET', null, successAction, errorAction, completeAction);
-        $.timer_get_monitor_data = null;
     };
 
 
@@ -1235,6 +1241,10 @@ $(function() {
             var timer_user_msg = setInterval(function() { get_user_messages(); }, 1000 * 60 * 5);
           }
 
+          if ($.config["show_outdated"]["frontend"]["enabled"] === true) {
+            var timer_freshness = setInterval(function() { check_data_freshness(); }, 1000 * 20); // every 20 seconds
+          }
+
         };
         // do the ajax call
         ajaxCall($.getconfig_url, 'GET', null, successAction);
@@ -1263,6 +1273,7 @@ $(function() {
 
     // start fetching the data
     $.monitor_data = null;
+    $.metadata = null;
     get_monitor_data();
 
     // show the time, set periodical call
@@ -1287,9 +1298,6 @@ $(function() {
     $.alive_timestamp = new Date().getTime() / 1000;
 
     $.myTimeout("worker", worker, $.queue_tick_time * 2);
-
-    check_data_freshness();
-    var timer_freshness = setInterval(function() { check_data_freshness(); }, 1000 * 20); // every 20 seconds
 
     // create a one-shot version of detect_display_options, to be called one time from get_monitor_data() and get_user_messages()
     $.once_detectdisplay_monitordata = _.once(detect_display_options);
