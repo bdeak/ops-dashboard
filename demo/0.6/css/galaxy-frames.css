@@ -1,0 +1,174 @@
+/*
+    galaxy-frames
+*/
+
+/*
+.f-toggle
+{
+    color: #BCC800;
+}
+*/
+/*.galaxy-frame-background
+{
+    z-index         : 100; 
+    position        : absolute;
+    display         : none;
+    height          : 100%;
+    width           : 100%;
+    opacity         : 0.05;
+    background      : #000000;
+}*/
+
+.galaxy-frame-shadow
+{
+	z-index		    : 101;
+    position        : absolute;
+    display         : none;
+    opacity         : 0.5;
+    background      : #A4A4A4;
+    border          : 0px solid #D0D0D0;
+}
+
+.galaxy-frame
+{
+    z-index         : 102;
+    overflow        : hidden;
+    position        : absolute;
+    height          : 100%;
+    width           : 100%;
+    opacity         : 1.0;
+    /*
+    background      : #FFFFFF;
+    border          : 1px solid #D0D0D0;
+    -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    */
+}
+/*
+    panel load button
+*/
+/*
+.galaxy-frame-load
+{
+    z-index         : 110; 
+    position        : absolute;
+    bottom          : 5px;
+    right           : 5px;
+    padding         : 0px 0px 0px 0px;
+    cursor          : pointer;
+}
+*/
+
+/*
+.galaxy-frame-load .title
+{
+    position        : absolute;
+    font-weight     : bold;
+    font-size       : 12px;
+    font-family     : Verdana, Arial;
+    top             : 28px;
+    left            : 35px;
+}
+*/
+
+/*
+    frame components
+*/
+.galaxy-frame .f-content
+{
+    overflow        : hidden;
+    background      : #FFFFFF;
+    border          : none;
+    top             : 24px;
+    bottom          : 3px;
+    left            : 3px;
+    right           : 3px;
+    position        : absolute;
+}
+
+/*
+.galaxy-frame .f-cover
+{
+    position        : absolute;
+    display         : none;
+    top             : 0px;
+    left            : 0px;
+    height          : 100%;
+    width           : 100%;
+    opacity         : 0.0;
+    background      : #FFFFFF;
+}
+*/
+/*
+.galaxy-frame .f-iframe
+{
+    border          : none;
+    overflow        : hidden;
+    width           : 100%;
+}
+*/
+/*
+.galaxy-frame .f-header
+{
+    height          : 17px;
+    margin          : 2px;
+    cursor          : pointer;
+    border          : 1px solid #000000;
+    background      : #303239;
+    color           : #FFFFFF;
+    font-weight     : bold;
+}
+*/
+/*
+.galaxy-frame .f-title
+{
+    position        : absolute;
+    top             : 2px;
+    left            : 16px;
+    right           : 16px;
+    font-size       : 12px;
+    font-family     : Verdana, Arial;
+    text-align      : center;
+}
+*/
+/*
+     frame icons
+*/
+/*
+.galaxy-frame .f-icon
+{
+    position        : absolute;
+    cursor          : pointer;
+}
+
+.galaxy-frame .f-not-allowed
+{
+    cursor: not-allowed;
+}
+
+.galaxy-frame .f-close
+{
+    right           : 5px;
+    top             : 4px;
+}
+
+.galaxy-frame .f-pin
+{
+    left            : 6px;
+    top             : 4px;
+}
+
+.galaxy-frame .f-resize
+{
+    position        : absolute;
+    right           : 0px;
+    bottom          : 0px;
+    background      : #FFFFFF;
+    width           : 16px;
+    height          : 16px;
+    color           : #303239;
+    right           : 0px;
+    bottom          : 1px;
+    text-align      : center;
+    line-height     : 16px;
+}
+*/
