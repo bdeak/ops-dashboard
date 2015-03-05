@@ -176,15 +176,24 @@ $(function() {
       // JS doesn't have autovivification
       var type_lookup = { 
         msg_big: { container_template: {}, container: {} }, 
-        msg_info: { container_template: {}, container: {} },
+        msg_loading: { container_template: {}, container: {} },
         msg_error: { container_template: {}, container: {} },
       };
 
       type_lookup["msg_big"]["template"] = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
       type_lookup["msg_big"]["container"] = "#msg_container_main";
 
-      type_lookup["msg_info"]["template"] = '<div id="{message_id}" class="msg_big msg_info">{message}</div>';
-      type_lookup["msg_info"]["container"] = "#msg_container_main";
+      //type_lookup["msg_info"]["template"] = '<div id="{message_id}" class="msg_big msg_info">{message}</div>';
+      //type_lookup["msg_info"]["container"] = "#msg_container_main";
+
+      type_lookup["msg_loading"]["template"] = '<div id="{message_id}" class="spinner"> \
+                                                  <div class="rect1"></div> \
+                                                  <div class="rect2"></div> \
+                                                  <div class="rect3"></div> \
+                                                  <div class="rect4"></div> \
+                                                  <div class="rect5"></div> \
+                                                </div>';
+      type_lookup["msg_loading"]["container"] = "#msg_container_main";      
 
       type_lookup["msg_error"]["template"] = '<div id="{message_id}" class="modal-content msg_error"> \
                                               <div class="modal-header"> \
@@ -248,16 +257,16 @@ $(function() {
           $.message_shown.type = type;
           $.message_shown.md5 = message_md5;
         }
-      } else {
-        if ($.message_shown.type !== null) {
-          // hide the error message
-          var element = {
-              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
-          }
-          $.frame_manager.queue_add("hide_msg", element);  
-          $.message_shown.type = null;
-          $.message_shown.md5 = null;
-        }
+      //} else {
+      //  if ($.message_shown.type !== null) {
+      //    // hide the error message
+      //    var element = {
+      //        container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
+      //    }
+      //    $.frame_manager.queue_add("hide_msg", element);  
+      //    $.message_shown.type = null;
+      //    $.message_shown.md5 = null;
+      //  }
       }
     };
 
@@ -1338,7 +1347,8 @@ $(function() {
           }
         
           // show the initial loading message
-          show_message("Fetching data from the icinga server...", "msg_info", true);
+          //show_message("Fetching data from the icinga server...", "msg_info", true);
+          show_message(null, "msg_loading", true);
 
           // start the oncall timer, or remove the tag for it if it's disabled
           if ($.config["oncall_lookup_enabled"] || $.config["aod_lookup_enabled"]) {
