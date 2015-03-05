@@ -257,16 +257,16 @@ $(function() {
           $.message_shown.type = type;
           $.message_shown.md5 = message_md5;
         }
-      //} else {
-      //  if ($.message_shown.type !== null) {
-      //    // hide the error message
-      //    var element = {
-      //        container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
-      //    }
-      //    $.frame_manager.queue_add("hide_msg", element);  
-      //    $.message_shown.type = null;
-      //    $.message_shown.md5 = null;
-      //  }
+      } else {
+        if ($.message_shown.type !== null) {
+          // hide the error message
+          var element = {
+              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
+          }
+          $.frame_manager.queue_add("hide_msg", element);  
+          $.message_shown.type = null;
+          $.message_shown.md5 = null;
+        }
       }
     };
 
