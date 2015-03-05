@@ -242,38 +242,52 @@ h1 {
     background-color: #D52AD5;
 }
 
-/* fixme: make this also dynamic */
-#msg_container_main.all_ok {
+#msg_container_main {
     width: 70%;
     margin-top: 10%;
-    font-family: 'Play', sans-serif;
-    display: none; /* will be shown from js */
-    font-size: 9vw;
     text-align: center;        
-    line-height: 1em;
     padding-bottom: 0.5em;
     padding-top: 0.5em;
     margin-left: auto;
     margin-right: auto;
+}
+
+/* fixme: make this also dynamic */
+#msg_container_main .msg_ok {
+    font-family: 'Play', sans-serif;
+    font-size: 9vw;   
     -moz-border-radius: 0.1em;
     border-radius: 0.1em;            
 }
 
-#msg_container_main.message_default {
-    width: 70%;
-    margin-top: 10%;
+#msg_container_main .msg_info {
     font-size: 3vw;
-    text-align: center;        
-    line-height: 1em;
-    padding-bottom: 0.5em;
-    padding-top: 0.5em;
-    margin-left: auto;
-    margin-right: auto;
     -moz-border-radius: 0.2em;
     border-radius: 0.2em;
     color: #bbbbbb;
     background-color: #444444;
     border-color: #dcdcdc;
+    padding: 0.3em;
 }
 
+#msg_container_main .msg_error {
+    font-size: 3vw;
+    -moz-border-radius: 0.2em;
+    border-radius: 0.2em;
+}
 
+.modal-header {
+    text-align: left;
+    font-size: 2vw;
+    padding: 0.1em 0.1em 0.1em 0.6vw;
+    color: #FFFFFF;
+    background-color: #868686;
+    -moz-border-radius: 0.2em 0.2em 0 0;
+    border-radius: 0.2em 0.2em 0 0;
+}
+
+.modal-body {
+    text-align: left;
+    padding-left: 0.6vw;
+    color: #545454;
+}

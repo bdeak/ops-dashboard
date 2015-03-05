@@ -125,7 +125,94 @@ $(function() {
     }
 
     // remove all tiles and display an error message
-    function show_error_message(statuscode, error, do_show) {
+    //function show_error_message(statuscode, error, do_show) {
+    //  if (do_show) {
+    //    if ($.frame_manager.get_frame_length() > 1) {
+    //      // issue a delete of all tiles in the grid
+//
+    //      // reverse the array (to delete from backwards to avoid sensless rearranging of the grid)
+    //      var ids = $.frame_manager.get_frame_list().reverse();
+    //      // iterate on the reversed array and delete the tiles that are no longer needed
+    //      $.each(ids, function(i) {
+    //        // get the md5 id for the current alert
+    //        // check if this tile existed before
+    //        console.debug("Deleting tile with id {0} to so error msg can be shown".format(ids[i]));
+    //        delete_tile(ids[i]);
+    //      });
+    //    }
+    //    // show the error message
+    //    if ($(".msg_error").length == 0) {
+    //      var msg = "There was a problem while loading data from the backend API: {0}".format(error);
+    //      var element = {
+    //        container: "#msg_container_main #msg_error",
+    //        classes: "message_default msg_error",
+    //        content: msg,
+    //      }
+    //      $.frame_manager.queue_add("show_msg", element);
+    //    }
+    //  } else {
+    //    // hide the error message
+    //    if ($(".msg_error").length) {
+    //        var element = {
+    //            container: "#msg_container_main #msg_error",
+    //        }
+    //        $.frame_manager.queue_add("hide_msg", element);  
+    //    }
+    //    if ($(".msg_big").length) {
+    //        var element = {
+    //            container: "#msg_container_main #msg_big",
+    //        }
+    //        $.frame_manager.queue_add("hide_msg", element);  
+    //    }
+    //  }
+    //};
+
+
+    // available types:
+    // * msg_big - ALL OK
+    // * msg_info - loading
+    // * msg_error - error message with header and different layout
+    function show_message(message, type, do_show, title) {
+      // JS doesn't have autovivification
+      var type_lookup = { 
+        msg_big: { container_template: {}, container: {} }, 
+        msg_info: { container_template: {}, container: {} },
+        msg_error: { container_template: {}, container: {} },
+      };
+
+      type_lookup["msg_big"]["template"] = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
+      type_lookup["msg_big"]["container"] = "#msg_container_main";
+
+      type_lookup["msg_info"]["template"] = '<div id="{message_id}" class="msg_big msg_info">{message}</div>';
+      type_lookup["msg_info"]["container"] = "#msg_container_main";
+
+      type_lookup["msg_error"]["template"] = '<div id="{message_id}" class="modal-content msg_error"> \
+                                              <div class="modal-header"> \
+                                                  <div class="bootstrap-dialog-header"> \
+                                                  <!-- \
+                                                      <div class="bootstrap-dialog-close-button" style="display: none;"> \
+                                                          <button class="close">×</button> \
+                                                      </div> \
+                                                  --> \
+                                                      <div class="bootstrap-dialog-title">{title}</div> \
+                                                  </div> \
+                                              </div> \
+                                              <div class="modal-body"> \
+                                                  <div class="bootstrap-dialog-body"> \
+                                                      <div class="bootstrap-dialog-message">{message}</div> \
+                                                  </div> \
+                                              </div> \
+                                          </div>';
+      type_lookup["msg_error"]["container"] = "#msg_container_main";
+      
+      var message_md5 = $.md5(message + type);
+      var message_id_template = "message_{md5}";
+      var message_id = message_id_template.format_by_name({md5: message_md5});
+
+      if ((title === undefined) && (type == "msg_error")) {
+        title = "Error";
+      }
+
       if (do_show) {
         if ($.frame_manager.get_frame_length() > 1) {
           // issue a delete of all tiles in the grid
@@ -140,27 +227,39 @@ $(function() {
             delete_tile(ids[i]);
           });
         }
-        // show the error message
-        if ($(".msg_error").length == 0) {
-          var msg = "There was a problem while loading data from the backend API: {0}".format(error);
+
+        // if there's a message already shown, we need to hide it first
+        if (($.message_shown.type !== null) && ($.message_shown.md5 != message_md5)) {
+          console.debug("deleting message with type {0}, id {1}".format($.message_shown.type, message_id_template.format_by_name({md5: $.message_shown.md5})));
           var element = {
-            container: "#msg_container_main",
-            classes: "message_default msg_error",
-            content: msg,
+              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})),
+          }
+          $.frame_manager.queue_add("hide_msg", element);
+        }
+        // fixme: it is always set to null, and then back to a value, therefore it's hidden and reshown all the time
+        if ($.message_shown.md5 != message_md5) {
+          console.debug("showing with message {0} with type {1}, id {2}".format(message, type, message_md5));
+          // show the error message
+          var element = {
+            container: type_lookup[type]["container"],
+            content: type_lookup[type]["template"].format_by_name({message: message, title: title, message_id: message_id}),
           }
           $.frame_manager.queue_add("show_msg", element);
+          $.message_shown.type = type;
+          $.message_shown.md5 = message_md5;
         }
       } else {
-        // hide the error message
-        if ($(".msg_error").length) {
-            var element = {
-                container: "#msg_container_main",
-            }
-            $.frame_manager.queue_add("hide_msg", element);  
+        if ($.message_shown.type !== null) {
+          // hide the error message
+          var element = {
+              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
           }
+          $.frame_manager.queue_add("hide_msg", element);  
+          $.message_shown.type = null;
+          $.message_shown.md5 = null;
+        }
       }
     };
-
 
     // delete the alerts that are no longer needed, in a reversed order (from bottom to top to avoid
     // senseless reordering of the grid)
@@ -558,63 +657,63 @@ $(function() {
 
 
     // show an initial message while the first data is being loaded
-    function show_loading() {
-      var element = {
-          container: "#msg_container_main",
-          classes: "message_default msg_loading",
-          content: "Fetching data from the icinga server...",
-      }
-      $.frame_manager.queue_add("show_msg", element);
-    };
+    //function show_loading() {
+    //  var element = {
+    //      container: "#msg_container_main #msg_big",
+    //      classes: "message_default msg_loading",
+    //      content: "Fetching data from the icinga server...",
+    //  }
+    //  $.frame_manager.queue_add("show_msg", element);
+    //};
 
     // display a message that no checks are in bad state
-    function display_all_ok(state) {
-      if (state) {
-        var msg = "Everything OK";
-        // check if not already shown
-        if ($(".msg_ok").length == 0) {
-          // show the message
-          var element = {
-            container: "#msg_container_main",
-            classes: "alert alert-success all_ok msg_ok",
-            content: msg, 
-          }
-          $.frame_manager.queue_add("show_msg", element);
-
-          // update the last_ok field if it's in use
-          if ($.config['show_last_ok'] === true) {
-            timer_lastok = setTimeout(function() { show_lastok(); }, 300);
-          }
-        }
-      } else {
-        // hide the error message, if needed
-        if ($(".msg_ok").length) {
-          var element = {
-              container: "#msg_container_main",
-          }
-          $.frame_manager.queue_add("hide_msg", element);
-  
-          // update the last_ok field if it's in use
-          if ($.config['show_last_ok'] === true) {
-            timer_lastok = setTimeout(function() { show_lastok(); }, 300);
-          }
-        }
-      }
-    };
+    //function display_all_ok(state) {
+    //  if (state) {
+    //    var msg = "Everything OK";
+    //    // check if not already shown
+    //    if ($(".msg_ok").length == 0) {
+    //      // show the message
+    //      var element = {
+    //        container: "#msg_container_main #msg_big",
+    //        classes: "alert alert-success all_ok msg_ok",
+    //        content: msg, 
+    //      }
+    //      $.frame_manager.queue_add("show_msg", element);
+//
+    //      // update the last_ok field if it's in use
+    //      if ($.config['show_last_ok'] === true) {
+    //        timer_lastok = setTimeout(function() { show_lastok(); }, 300);
+    //      }
+    //    }
+    //  } else {
+    //    // hide the error message, if needed
+    //    if ($(".msg_ok").length) {
+    //      var element = {
+    //          container: "#msg_container_main #msg_big",
+    //      }
+    //      $.frame_manager.queue_add("hide_msg", element);
+  //
+    //      // update the last_ok field if it's in use
+    //      if ($.config['show_last_ok'] === true) {
+    //        timer_lastok = setTimeout(function() { show_lastok(); }, 300);
+    //      }
+    //    }
+    //  }
+    //};
 
     // helper function for display_all_ok()
     // because tiles are being deleted with a delay, the ok message must only be 
     // visible after no more tiles are visible
-    function show_popup_when_no_more_frames(element) {
-        // check if there are any tiles still visible, if yes, start another loop via setTimeout()
-        // >2 because the shadow element is always in the grid
-        if ($.frame_manager.get_frame_length() > 1) {
-          setTimeout(function() {show_popup_when_no_more_frames(element)}, 500);
-        } else {
-          // no more tiles visible, fade in the message
-          $(element).fadeIn(800);
-        }
-    };
+    //function show_popup_when_no_more_frames(element) {
+    //    // check if there are any tiles still visible, if yes, start another loop via setTimeout()
+    //    // >2 because the shadow element is always in the grid
+    //    if ($.frame_manager.get_frame_length() > 1) {
+    //      setTimeout(function() {show_popup_when_no_more_frames(element)}, 500);
+    //    } else {
+    //      // no more tiles visible, fade in the message
+    //      $(element).fadeIn(800);
+    //    }
+    //};
 
     function delete_tile(e) {
       var id = null;
@@ -693,6 +792,16 @@ $(function() {
             var re = new RegExp(placeholder, "g");
             formatted = formatted.replace(re, arguments[arg]);
         }
+        return formatted;
+    };
+
+    String.prototype.format_by_name = function(format) {
+        var formatted = this;
+        $.each(format, function(name, value) {
+            var placeholder = "\\{" + name + "\\}";
+            var re = new RegExp(placeholder, "g");
+            formatted = formatted.replace(re, value);
+        });
         return formatted;
     };
 
@@ -988,7 +1097,7 @@ $(function() {
 
         // check if the result is valid
         if (($.monitor_data) && ("ERROR" in $.monitor_data)) {
-          show_error_message(null, $.monitor_data["ERROR"]["message"], true);
+          show_message($.monitor_data["ERROR"]["message"], "msg_error", true);
           $.myTimeout("worker", worker, 5000);
           return false;
         }
@@ -996,7 +1105,7 @@ $(function() {
         if (($.metadata !== null) && ($.config["show_outdated"]["icinga"]["enabled"] === true)) {
           if ($.metadata["status_data_age"] > $.metadata["status_update_interval"] * parseInt($.config["show_outdated"]["icinga"]["threshold"])) {
             // data is outdated, show error message
-            show_error_message(null, "Data received from monitoring server is outdated", true);
+            show_message("Data received from monitoring server is outdated", "msg_error", true);
             $.myTimeout("worker", worker, 5000);
             return false;
           }
@@ -1005,7 +1114,7 @@ $(function() {
         // hide the error message, if it was present
         if ($(".msg_error").length || $(".msg_loading").length) {
           var element = {
-              container: "#msg_container_main",
+              container: "#msg_container_main #msg_error",
           }
           $.frame_manager.queue_add("hide_msg", element);
         }
@@ -1020,15 +1129,17 @@ $(function() {
         var data_shown = {};
         data_shown = {};
         var i = 0;
-        $.each($.monitor_data, function(index, obj) {
-          if (i >= $.tiles_max) {
-          //if (i >= 3) {
-            return false
-          } else {
-            data_shown[index] = obj;
-            i += 1;
-          }
-        });
+        if ($.tiles_total != 0) {        
+          $.each($.monitor_data, function(index, obj) {
+            if (i >= $.tiles_max) {
+            //if (i >= 3) {
+              return false
+            } else {
+              data_shown[index] = obj;
+              i += 1;
+            }
+          });
+        }
 
         // remove tiles that are there, but are not supposed to be there
         delete_no_longer_needed_alerts(data_shown);
@@ -1036,12 +1147,19 @@ $(function() {
 
         if ($.tiles_total == 0) {
           // display the message
-          display_all_ok(true);
+          show_message("Everything OK", "msg_big", true);
+          if ($.config['show_last_ok'] === true) {
+            $.myTimeout("show_lastok", show_lastok, 300);
+          }
           // hide the infobar, if it was showed
           show_infobar_if_needed(data_shown);
         } else {
           // hide the all ok message
-          display_all_ok(false);
+          show_message("Everything OK", "msg_big", false);
+          if ($.config['show_last_ok'] === true) {
+            $.myTimeout("show_lastok", show_lastok, 300);
+          }
+          
           // add new alerts
           add_new_alerts_if_needed(data_shown);
 
@@ -1085,7 +1203,7 @@ $(function() {
         errorAction = function (xhr, status, error) {
           var statuscode = xhr.status;
           // show the error message in a popup window
-          show_error_message(statuscode, error, true);
+          show_message("Error {0}: {1}".format(statuscode, error), "msg_error", true);
         };
 
         // when completed, call another loop for the worker
@@ -1220,7 +1338,7 @@ $(function() {
           }
         
           // show the initial loading message
-          show_loading();
+          show_message("Fetching data from the icinga server...", "msg_info", true);
 
           // start the oncall timer, or remove the tag for it if it's disabled
           if ($.config["oncall_lookup_enabled"] || $.config["aod_lookup_enabled"]) {
@@ -1274,6 +1392,7 @@ $(function() {
     // start fetching the data
     $.monitor_data = null;
     $.metadata = null;
+    $.message_shown = { type: null, md5: null };
     get_monitor_data();
 
     // show the time, set periodical call

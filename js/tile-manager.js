@@ -191,21 +191,21 @@ var TileManager = Backbone.View.extend(
               // show a message
               // check if another message is currently shown
               postfunc = element.postfunc || [];              
-              if ($(element.container).hasClass("hidden") == false) {
-                  // it's shown
-                  // requeue the add event, and add a delete event as the next element in the queue
-                  this.queue_add("show_msg", element, true);
-                  this.queue_add("hide_msg", {container: element.container, postfunc: []}, true);
-              } else {
+              //if ($(element.container).hasClass("hidden") == false) {
+              //    // it's shown
+              //    // requeue the add event, and add a delete event as the next element in the queue
+              //    this.queue_add("show_msg", element, true);
+              //    this.queue_add("hide_msg", {container: element.container, postfunc: []}, true);
+              //} else {
                   var animate = false;
                   if (_.isBoolean(element.animate)) {
                     animate = element.animate;
                   }
                   // just show the message
-                  this.show_message(element.container, element.classes, element.content, animate, postfunc, element.messages_shown);
+                  this.show_message(element.container, element.classes, element.content, animate, postfunc);
                   // queue a dummy element to allow longer animation times
                   this.queue_add("dummy", {}, true);
-              }
+              //}
               this.start_queue_processing();
           } else if (type == "hide_msg") {
               // hide a message
@@ -220,7 +220,7 @@ var TileManager = Backbone.View.extend(
               if (_.isBoolean(element.animate)) {
                 animate = element.animate;
               }
-              this.update_message(element.container, element.classes, element.content, animate, element.messages_shown);
+              this.update_message(element.container, element.classes, element.content, animate);
           } else if (type == "adjust_size") {
               // change the size of the grid, adjust the side margins and tile text also
               this.adjust_size(element);
@@ -353,19 +353,43 @@ var TileManager = Backbone.View.extend(
       return false;
     },
 
+    //// show a message outside of the grid area
+    //show_message: function(container, classes, content, animate, postfunc) {
+    //    // add the classes to it if needed
+    //    // fade the infobar in
+    //    console.log($(container).html())
+    //    $(container).html(content).removeClass().addClass(classes).hide().fadeIn(this.options.queue_tick_time * 2);
+    //    $.each(postfunc, function(f) {
+    //      postfunc[f]();
+    //    });
+    //},
+//
+    //hide_message: function(container, postfunc) {
+    //    $(container).fadeOut(this.options.queue_tick_time * 2, function() {
+    //      $(container).removeClass().addClass("hidden").hide().empty();
+    //      $.each(postfunc, function(f) {
+    //        postfunc[f]();
+    //      });
+    //    });
+    //},
+
+
     // show a message outside of the grid area
-    show_message: function(container, classes, content, animate, postfunc, messages_shown) {
+    show_message: function(container, classes, content, animate, postfunc) {
         // add the classes to it if needed
         // fade the infobar in
-        $(container).html(content).removeClass().addClass(classes).hide().fadeIn(this.options.queue_tick_time * 2);
-        $.each(postfunc, function(f) {
-          postfunc[f]();
+        console.debug("showing");
+        $(container).append(content).hide().fadeIn(this.options.queue_tick_time * 2, function() {
+          $.each(postfunc, function(f) {
+            postfunc[f]();
+          });
         });
     },
 
     hide_message: function(container, postfunc) {
+        console.debug("deleting");
         $(container).fadeOut(this.options.queue_tick_time * 2, function() {
-          $(container).removeClass().addClass("hidden").hide().empty();
+          $(container).remove();
           $.each(postfunc, function(f) {
             postfunc[f]();
           });
@@ -373,8 +397,9 @@ var TileManager = Backbone.View.extend(
     },
 
     // show a message outside of the grid area
-    update_message: function(container, classes, content, animate, messages_shown) {
-      $(container).html(content).removeClass().addClass(classes);
+    update_message: function(container, classes, content, animate) {
+      console.debug("updating FIXME!");
+      $(container).html(content).removeClass().addClass(classes); // fixme: need to remove/add, but not sure if this is used ever
       this.start_queue_processing();
     },
   
