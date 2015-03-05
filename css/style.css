@@ -43,8 +43,8 @@ body, html {
     border-bottom: 1px dotted #333333;
     padding-bottom: 0px;
     display: block;
-    font-size: 1.7vw;
-    margin-bottom: 0.5em;
+    font-size: 2.3vh;
+    margin-bottom: 1.5vh;
 }
 
 h1 {
@@ -242,9 +242,21 @@ h1 {
     background-color: #D52AD5;
 }
 
+#msg_container_outer {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+}
+
+
 #msg_container_main {
+    /* vertical align */
+    /* https://css-tricks.com/centering-css-complete-guide/ */
     width: 70%;
-    margin-top: 10%;
     text-align: center;        
     padding-bottom: 0.5em;
     padding-top: 0.5em;
@@ -252,25 +264,14 @@ h1 {
     margin-right: auto;
 }
 
-/* fixme: make this also dynamic */
 #msg_container_main .msg_ok {
     font-family: 'Play', sans-serif;
     font-size: 9vw;   
     -moz-border-radius: 0.1em;
-    border-radius: 0.1em;            
+    border-radius: 0.1em;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;        
 }
-
-/*
-#msg_container_main .msg_info {
-    font-size: 3vw;
-    -moz-border-radius: 0.2em;
-    border-radius: 0.2em;
-    color: #bbbbbb;
-    background-color: #444444;
-    border-color: #dcdcdc;
-    padding: 0.3em;
-}
-*/
 
 #msg_container_main .msg_error {
     font-size: 3vw;
@@ -297,8 +298,6 @@ h1 {
 /* spinner for the loading animation */ 
 /* http://tobiasahlin.com/spinkit/ */
 .spinner {
-  height: 30px;
-  text-align: center;
   font-size: 10px;
 }
 

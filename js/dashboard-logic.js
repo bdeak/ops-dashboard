@@ -170,7 +170,7 @@ $(function() {
 
     // available types:
     // * msg_big - ALL OK
-    // * msg_info - loading
+    // * msg_loading - loading
     // * msg_error - error message with header and different layout
     function show_message(message, type, do_show, title) {
       // JS doesn't have autovivification
@@ -182,9 +182,6 @@ $(function() {
 
       type_lookup["msg_big"]["template"] = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
       type_lookup["msg_big"]["container"] = "#msg_container_main";
-
-      //type_lookup["msg_info"]["template"] = '<div id="{message_id}" class="msg_big msg_info">{message}</div>';
-      //type_lookup["msg_info"]["container"] = "#msg_container_main";
 
       type_lookup["msg_loading"]["template"] = '<div id="{message_id}" class="spinner"> \
                                                   <div class="rect1"></div> \
@@ -232,7 +229,7 @@ $(function() {
           $.each(ids, function(i) {
             // get the md5 id for the current alert
             // check if this tile existed before
-            console.debug("Deleting tile with id {0} to so error msg can be shown".format(ids[i]));
+            console.debug("Deleting tile with id '{0}'' so message can be shown".format(ids[i]));
             delete_tile(ids[i]);
           });
         }
@@ -247,7 +244,7 @@ $(function() {
         }
         // fixme: it is always set to null, and then back to a value, therefore it's hidden and reshown all the time
         if ($.message_shown.md5 != message_md5) {
-          console.debug("showing with message {0} with type {1}, id {2}".format(message, type, message_md5));
+          console.debug("showing message '{0}' with type '{1}', id '{2}'".format(message, type, message_md5));
           // show the error message
           var element = {
             container: type_lookup[type]["container"],
@@ -663,66 +660,6 @@ $(function() {
       $.frame_manager_infobar.start_queue_processing();
 
     }; 
-
-
-    // show an initial message while the first data is being loaded
-    //function show_loading() {
-    //  var element = {
-    //      container: "#msg_container_main #msg_big",
-    //      classes: "message_default msg_loading",
-    //      content: "Fetching data from the icinga server...",
-    //  }
-    //  $.frame_manager.queue_add("show_msg", element);
-    //};
-
-    // display a message that no checks are in bad state
-    //function display_all_ok(state) {
-    //  if (state) {
-    //    var msg = "Everything OK";
-    //    // check if not already shown
-    //    if ($(".msg_ok").length == 0) {
-    //      // show the message
-    //      var element = {
-    //        container: "#msg_container_main #msg_big",
-    //        classes: "alert alert-success all_ok msg_ok",
-    //        content: msg, 
-    //      }
-    //      $.frame_manager.queue_add("show_msg", element);
-//
-    //      // update the last_ok field if it's in use
-    //      if ($.config['show_last_ok'] === true) {
-    //        timer_lastok = setTimeout(function() { show_lastok(); }, 300);
-    //      }
-    //    }
-    //  } else {
-    //    // hide the error message, if needed
-    //    if ($(".msg_ok").length) {
-    //      var element = {
-    //          container: "#msg_container_main #msg_big",
-    //      }
-    //      $.frame_manager.queue_add("hide_msg", element);
-  //
-    //      // update the last_ok field if it's in use
-    //      if ($.config['show_last_ok'] === true) {
-    //        timer_lastok = setTimeout(function() { show_lastok(); }, 300);
-    //      }
-    //    }
-    //  }
-    //};
-
-    // helper function for display_all_ok()
-    // because tiles are being deleted with a delay, the ok message must only be 
-    // visible after no more tiles are visible
-    //function show_popup_when_no_more_frames(element) {
-    //    // check if there are any tiles still visible, if yes, start another loop via setTimeout()
-    //    // >2 because the shadow element is always in the grid
-    //    if ($.frame_manager.get_frame_length() > 1) {
-    //      setTimeout(function() {show_popup_when_no_more_frames(element)}, 500);
-    //    } else {
-    //      // no more tiles visible, fade in the message
-    //      $(element).fadeIn(800);
-    //    }
-    //};
 
     function delete_tile(e) {
       var id = null;
@@ -1152,7 +1089,6 @@ $(function() {
 
         // remove tiles that are there, but are not supposed to be there
         delete_no_longer_needed_alerts(data_shown);
-        //delete_no_longer_needed_alerts({});
 
         if ($.tiles_total == 0) {
           // display the message
@@ -1172,12 +1108,9 @@ $(function() {
           // add new alerts
           add_new_alerts_if_needed(data_shown);
 
-          // show infobar at the bottom if needed
-          //show_infobar_if_needed($.monitor_data);
-
           // update information on alerts currently displayed
           update_alert_information(data_shown);
-        } 
+        }
 
         // add a queue entry for changing the number of columns - will do anything only if it's needed
         $.frame_manager.queue_add("external_function", {func_name: change_column_number_if_needed});

@@ -242,8 +242,8 @@ $(function() {
         var ignored_counter = 0;
         for (var host_counter = 0 ; host_counter < num_hosts ; host_counter++) {
             for (var service_counter = 0 ; service_counter < num_services ; service_counter++) {
-                var host = host_pattern.replace(/_$/, host_counter);
-                var service = service_pattern.replace(/_$/, service_counter);
+                var host = host_pattern.replace(/_$/, host_counter + 1);
+                var service = service_pattern.replace(/_$/, service_counter + 1);
 
                 if (check_alert_stored(host, service) === false) {
                         $.alert_data.push({priority: priority, service: service, host: host, state: state});
