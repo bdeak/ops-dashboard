@@ -124,50 +124,6 @@ $(function() {
         });
     }
 
-    // remove all tiles and display an error message
-    //function show_error_message(statuscode, error, do_show) {
-    //  if (do_show) {
-    //    if ($.frame_manager.get_frame_length() > 1) {
-    //      // issue a delete of all tiles in the grid
-//
-    //      // reverse the array (to delete from backwards to avoid sensless rearranging of the grid)
-    //      var ids = $.frame_manager.get_frame_list().reverse();
-    //      // iterate on the reversed array and delete the tiles that are no longer needed
-    //      $.each(ids, function(i) {
-    //        // get the md5 id for the current alert
-    //        // check if this tile existed before
-    //        console.debug("Deleting tile with id {0} to so error msg can be shown".format(ids[i]));
-    //        delete_tile(ids[i]);
-    //      });
-    //    }
-    //    // show the error message
-    //    if ($(".msg_error").length == 0) {
-    //      var msg = "There was a problem while loading data from the backend API: {0}".format(error);
-    //      var element = {
-    //        container: "#msg_container_main #msg_error",
-    //        classes: "message_default msg_error",
-    //        content: msg,
-    //      }
-    //      $.frame_manager.queue_add("show_msg", element);
-    //    }
-    //  } else {
-    //    // hide the error message
-    //    if ($(".msg_error").length) {
-    //        var element = {
-    //            container: "#msg_container_main #msg_error",
-    //        }
-    //        $.frame_manager.queue_add("hide_msg", element);  
-    //    }
-    //    if ($(".msg_big").length) {
-    //        var element = {
-    //            container: "#msg_container_main #msg_big",
-    //        }
-    //        $.frame_manager.queue_add("hide_msg", element);  
-    //    }
-    //  }
-    //};
-
-
     // available types:
     // * msg_big - ALL OK
     // * msg_loading - loading
@@ -978,6 +934,7 @@ $(function() {
 
       // get the lastok state
       function show_lastok() {
+        if ($.config['show_last_ok'] === true) {
           successAction = function(data, status, xhr) {
             if ($('#lastok-container').hasClass("hidden")) {
               $('#lastok-container').removeClass("hidden");
@@ -995,21 +952,22 @@ $(function() {
           }
           // do the ajax call
           ajaxCall($.lastok_url, 'GET', null, successAction);
+        }
       };
 
-      // check if alert on freshness should be displayed
+      // check if alert on data freshness should be displayed
       function check_data_freshness() {
         var now = new Date().getTime() / 1000;
-        if ((now - $.alive_timestamp) > parseInt($.config["show_outdated"]["frontend"]["max_time"])) {
-          // make background different color
-          // fixme: display popup instead?
-          $("body").addClass("outdated");
-        } else {
-          // remove the bg coloring if it's no longer needed
-          if ($("body").hasClass("outdated")) {
-            $("body").removeClass("outdated");
-          }
+        var is_fresh = true;
+        if ((now - $.alive_timestamp) > parseInt($.config["show_outdated"]["data"]["max_time"])) {
+          is_fresh = false;
         }
+        if (is_fresh === false) {
+          show_message("The data update process seems not to be running properly.", "msg_error", true);
+        } else {
+          show_message("The data update process seems not to be running properly.", "msg_error", false);
+        }
+        return is_fresh;
       };
 
       // get user messages data
@@ -1057,6 +1015,12 @@ $(function() {
           }
         }
 
+        if (check_data_freshness() === false) {
+          // message is shown, don't go on with displaying any tiles
+          $.myTimeout("worker", worker, 5000);
+          return false;
+        }
+
         // hide the error message, if it was present
         if ($(".msg_error").length || $(".msg_loading").length) {
           var element = {
@@ -1093,17 +1057,14 @@ $(function() {
         if ($.tiles_total == 0) {
           // display the message
           show_message("Everything OK", "msg_big", true);
-          if ($.config['show_last_ok'] === true) {
-            $.myTimeout("show_lastok", show_lastok, 300);
-          }
+          show_lastok();
+          
           // hide the infobar, if it was showed
           show_infobar_if_needed(data_shown);
         } else {
           // hide the all ok message
           show_message("Everything OK", "msg_big", false);
-          if ($.config['show_last_ok'] === true) {
-            $.myTimeout("show_lastok", show_lastok, 300);
-          }
+          show_lastok();
           
           // add new alerts
           add_new_alerts_if_needed(data_shown);
@@ -1126,11 +1087,7 @@ $(function() {
       } else {
         // set up a shorter timeout
         $.myTimeout("worker", worker, ($.frame_manager.queue_length() + 4) * $.queue_tick_time);
-      }
-      // update global timestamp showing freshness of the data showed on the screen
-      // will be checked in check_data_freshness()
-      $.alive_timestamp = new Date().getTime() / 1000;
-      
+      }     
     };
 
     function get_monitor_data() {
@@ -1152,6 +1109,10 @@ $(function() {
         completeAction = function() {
           // set the next loop, while making sure only one instance of the worker is running
           $.myTimeout("get_monitor_data", get_monitor_data, 10 * 1000);
+          
+          // update global timestamp showing freshness of the data showed on the screen
+          // will be checked in check_data_freshness()
+          $.alive_timestamp = new Date().getTime() / 1000;          
         };
 
         // do the ajax call
@@ -1257,10 +1218,23 @@ $(function() {
       }
       $.timers[name] = setTimeout(function(func, name) {
           func();
-          $.timers[name] = null;
       }, duration, func, name);
-      
     };
+
+    $.myKillTimeout = function (name) {
+      if (($.timers !== undefined) && (name in $.timers) && ($.timers[name] !== null)) {
+        clearTimeout($.timers[name]);
+        $.timers[name] = null;
+        if ($.debug)
+          console.debug("Timeout with name '{0}' has been killed".format(name));
+      } else {
+        console.warn("Can't kill timeout with name '{0}': timer not found".format(name));
+      }
+    }
+
+    // expose function to the JS console in the browser for debugging
+    if ($.debug) 
+      window.myKillTimeout = $.myKillTimeout;
 
     // get the configuration via API call, initialize display using the configuration contents
     function init() {
@@ -1302,7 +1276,7 @@ $(function() {
             var timer_user_msg = setInterval(function() { get_user_messages(); }, 1000 * 60 * 5);
           }
 
-          if ($.config["show_outdated"]["frontend"]["enabled"] === true) {
+          if ($.config["show_outdated"]["data"]["enabled"] === true) {
             var timer_freshness = setInterval(function() { check_data_freshness(); }, 1000 * 20); // every 20 seconds
           }
 
