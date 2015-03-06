@@ -279,37 +279,36 @@ if ($config["show_last_ok"]) {
 	$last_state = get_last_state();
 	if (!array_key_exists("state", $last_state)) {
 		# first run, initialize with the current state
-		if (count($statuses) == 0) {
+		if (!(array_key_exists("status", $statuses) || (array_key_exists("status", $statuses) && count($statuses["status"]) == 0))) {
 			write_last_status("OK");
 		} else {
 			write_last_status("PROBLEM");
 		}
-	}
-	if (count($statuses) == 0) {
-		if ($last_state["state"] != "OK") {
-			# we went to ok state, write this information
-			write_last_status("OK");
-		}
 	} else {
-		if ($last_state["state"] == "OK") {
-			$host_count = 0;
-			$warn_count = 0;
-			$crit_count = 0;
-			# get the host/service critical/service warning numbers
-			foreach ($statuses as $key => $value) {
-				if ($statuses[$key]['type'] == "host") {
+		# there is an old state, and a new state also
+		$host_count = 0;
+		$warn_count = 0;
+		$crit_count = 0;
+		if (!(array_key_exists("status", $statuses) || (array_key_exists("status", $statuses) && count($statuses["status"]) == 0))) {			
+			$current_state = "OK";
+		} else {
+			$current_state = "PROBLEM";
+			foreach ($statuses["status"] as $key => $value) {
+				if ($statuses["status"][$key]['type'] == "host") {
 					$host_count++;
 				}
-				if ($statuses[$key]['type'] == "service") {
-					if ($statuses[$key]['status'] == "CRITICAL") {
+				if ($statuses["status"][$key]['type'] == "service") {
+					if ($statuses["status"][$key]['status'] == "CRITICAL") {
 						$crit_count++;
-					} elseif ($statuses[$key]['status'] == "WARNING") {
+					} elseif ($statuses["status"][$key]['status'] == "WARNING") {
 						$warn_count++;
 					}
 				}
 			}
-			# we went from ok to problem, write this information
-			write_last_status("PROBLEM", $host_count, $crit_count, $warn_count);
+		}
+		if ($current_state != $last_state["state"]) {
+				write_last_status($current_state, $host_count, $crit_count, $warn_count);
+				$l->info("Writing updated state: " . $current_state);
 		}
 	}
 }
