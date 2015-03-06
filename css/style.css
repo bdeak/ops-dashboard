@@ -273,26 +273,28 @@ h1 {
     padding-bottom: 0.4em;        
 }
 
-#msg_container_main .msg_error {
-    font-size: 3vw;
-    -moz-border-radius: 0.2em;
-    border-radius: 0.2em;
+#msg_container_main .modal-content {
+    border-radius: 0.5vw 0.5vw 0.5vw 0.5vw;
+    -moz-border-radius: 0.5vw 0.5vw 0.5vw 0.5vw;
 }
 
-.modal-header {
+#msg_container_main .modal-header {
     text-align: left;
-    font-size: 2vw;
+    font-size: 1.2vw;
     padding: 0.1em 0.1em 0.1em 0.6vw;
     color: #FFFFFF;
     background-color: #868686;
-    -moz-border-radius: 0.2em 0.2em 0 0;
-    border-radius: 0.2em 0.2em 0 0;
+    -moz-border-radius: 0.5vw 0.5vw 0 0;
+    border-radius: 0.5vw 0.5vw 0 0;
 }
 
-.modal-body {
+#msg_container_main .modal-body {
+    font-size: 1.4vw;
     text-align: left;
     padding-left: 0.6vw;
     color: #545454;
+    -moz-border-radius: 0 0 0.5vw 0.5vw;
+    border-radius: 0 0 0.5vw 0.5vw;
 }
 
 /* spinner for the loading animation */ 

@@ -129,6 +129,19 @@ $(function() {
     // * msg_loading - loading
     // * msg_error - error message with header and different layout
     function show_message(message, type, do_show, title) {
+
+      function message_displayed(id) {
+        var selector_id = $("#"+ id);
+        if (selector_id.length > 0) {
+          selector_id.unbind();
+          return true;
+        }
+        else {
+          selector_id.unbind();
+          return false;
+        }
+      }
+
       // JS doesn't have autovivification
       var type_lookup = { 
         msg_big: { container_template: {}, container: {} }, 
@@ -167,6 +180,7 @@ $(function() {
                                           </div>';
       type_lookup["msg_error"]["container"] = "#msg_container_main";
       
+      message = message || "";
       var message_md5 = $.md5(message + type);
       var message_id_template = "message_{md5}";
       var message_id = message_id_template.format_by_name({md5: message_md5});
@@ -198,8 +212,7 @@ $(function() {
           }
           $.frame_manager.queue_add("hide_msg", element);
         }
-        // fixme: it is always set to null, and then back to a value, therefore it's hidden and reshown all the time
-        if ($.message_shown.md5 != message_md5) {
+        if (! message_displayed(message_id)) {
           console.debug("showing message '{0}' with type '{1}', id '{2}'".format(message, type, message_md5));
           // show the error message
           var element = {
@@ -211,12 +224,13 @@ $(function() {
           $.message_shown.md5 = message_md5;
         }
       } else {
-        if ($.message_shown.type !== null) {
+        if (message_displayed(message_id)) {
+        console.debug("Hide message was requested for message {0}, type {1}".format(message, type));
           // hide the error message
           var element = {
-              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})), // fixme: initially this may be null
+              container: "{0} #{1}".format(type_lookup[type]["container"], message_id), // fixme: initially this may be null
           }
-          $.frame_manager.queue_add("hide_msg", element);  
+          $.frame_manager.queue_add("hide_msg", element);
           $.message_shown.type = null;
           $.message_shown.md5 = null;
         }
@@ -1021,13 +1035,15 @@ $(function() {
           return false;
         }
 
-        // hide the error message, if it was present
-        if ($(".msg_error").length || $(".msg_loading").length) {
-          var element = {
-              container: "#msg_container_main #msg_error",
-          }
-          $.frame_manager.queue_add("hide_msg", element);
-        }
+        show_message(null, "msg_loading", false);
+
+        //// hide the error message, if it was present
+        //if ($(".msg_error").length || $(".msg_loading").length) {
+        //  var element = {
+        //      container: "#msg_container_main #msg_error",
+        //  }
+        //  $.frame_manager.queue_add("hide_msg", element);
+        //}
 
         // we only show a predefined number of tiles, therefore we create a subset of the 
         // data hash that we will work with from now on
