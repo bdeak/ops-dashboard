@@ -466,11 +466,6 @@ var TileManager = Backbone.View.extend(
             var id = ids[index];
             var frame = this.frame_list[id];
 
-            // skip the shadow, if it's there
-            if (id == "frame-shadow") {
-              continue;
-            }
-
             // check if any resizing is needed
             var p = this.calculate_grid_position(frame.index);
             var pixel = this.calculate_pixel_position(p.left, p.top);
@@ -490,7 +485,6 @@ var TileManager = Backbone.View.extend(
         } else {
           // all at once or graivty == null
           _.each(this.frame_list, function(frame, id) {
-              if (id == "frame-shadow") return true; // continue
 
               // check if any resizing is needed
               var p = self.calculate_grid_position(frame.index);
@@ -642,18 +636,6 @@ var TileManager = Backbone.View.extend(
         return content;
     },
     
-    // fill shadow template
-    frame_template_shadow: function(id)
-    {
-        return "<div id='" + id + "' class='frame-shadow f-corner'></div>";
-    },
-    
-    // fill background template in order to cover underlying iframes
-    frame_template_background: function()
-    {
-        return "<div class='frame-background'></div>";
-    },
-
     get_frame_position: function(id)
     {   
         for (var frame in this.frame_list) {
@@ -701,9 +683,6 @@ var TileManager = Backbone.View.extend(
         var result = [];
         // create an array
         for (var id in this.frame_list) {
-            if (id == "frame-shadow") {
-                continue;
-            } 
             result.push(this.frame_list[id]);
         }
         // sort the array based on the indexes, and use map to return an array with only the ids in it, while keeping it sorted

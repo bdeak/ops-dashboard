@@ -17,9 +17,9 @@ $(function() {
         }
 
         // template for the message
-        var msg_template = '<div id="{id}" class="galaxy-frame"> \
+        var msg_template = '<div id="{id}" class="tile-frame"> \
         						<!-- index: {index}, left: {left}, top: {top} --> \
-        						<div id="{id}" class="alert alert-{state} tile"> \
+        						<div class="alert alert-{state} tile"> \
         							<div class="priority {priority_hidden}">{priority}</div> \
     								<div class="service {service_hidden}">{service}</div> \
 									<div class="host">{host}</div> \
@@ -30,7 +30,7 @@ $(function() {
 										<span class="dashtag">{duration}</span> \
 									</div> \
 								</div> \
-							</div>'
+							</div>\n';
 
 		var priority_hidden = (object['priority'] == 0 ? "hidden" : "");
 		var alert_active_hidden = (object['alert_active'] == 0 ? "hidden" : "");
@@ -557,7 +557,7 @@ $(function() {
       return text;
     }
 
-    // initialize the galaxy frame grid
+    // initialize the frame grid
     function draw_grid() {
       // initialize frame manager
       $.frame_manager = new TileManager(

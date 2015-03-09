@@ -110,6 +110,8 @@ h1 {
   padding: 8px 3% 8px 14px;
   border: 0;
   margin-bottom: 0px;
+  height: 100%;  
+  text-align: right;
 }
 
 /* colors for the tiles - gradients */
@@ -198,9 +200,13 @@ h1 {
 
 }
 
-.alert.tile {
-    text-align: right;
-    height: 100%;   
+.tile-frame {
+    z-index         : 102;
+    overflow        : hidden;
+    position        : absolute;
+    height          : 100%;
+    width           : 100%;
+    opacity         : 1.0;
 }
 
 .priority {
@@ -269,7 +275,8 @@ h1 {
     -moz-border-radius: 0.1em;
     border-radius: 0.1em;
     padding-top: 0.4em;
-    padding-bottom: 0.4em;        
+    padding-bottom: 0.4em;   
+    text-align: center;     
 }
 
 #msg_container_main .modal-content {
