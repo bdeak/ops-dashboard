@@ -65,16 +65,9 @@ body, html {
 }
 
 .container-separator {
-    border-right: 1px dotted #888888;
-    margin-left: 0.4em;
-    margin-right: 0.4em;
-    color: rgb(153, 153, 153);
-}
-
-.usermsg-separator {
-    border-right: 1px solid #888888;
-    margin-left: 2em;
-    margin-right: 2em;
+    border-right: 1px dotted #333333;
+    margin-left: 0.7em;
+    margin-right: 0.7em;
     color: rgb(153, 153, 153);
 }
 
@@ -82,7 +75,8 @@ body, html {
     display: inline;
     color: #FFFFFF;
     font-family: 'Alegreya Sans', sans-serif;
-    font-size: 130%;
+    font-size: 140%;
+    align-self: center;
 }
 
 .topicon {
@@ -94,15 +88,12 @@ body, html {
     text-align: right;
 }
 
-#header-right-container {
-    margin-right: 1.4vw;
-}
-
 #clock-container {
    text-align: right;
    font-family: 'Architects Daughter', cursive;
    display: inline-table;
    font-size: 2.8vw;
+   margin-right: 1.4vw;
 }
 
 .alert {
