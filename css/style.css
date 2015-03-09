@@ -42,27 +42,26 @@ body, html {
     margin-top: 0px;
     border-bottom: 1px dotted #333333;
     padding-bottom: 0px;
-    display: block;
-    font-size: 2.3vh;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    font-size: 1vw;
     margin-bottom: 1.5vh;
 }
 
-h1 {
-	margin-left: 1em;
-    margin-bottom: 0;
-    margin-top: 0;
+.main-title {
     font-family: 'Alegreya Sans', sans-serif;
     color: #FFFFFF;
-    vertical-align: middle;
-    display: inline;
-    font-size: 100%;
-}
-
-/* fixme: check if vw works on mobile browsers, if not, replace with JS magic */
-.main-title {
-    display: inline-table;
     font-size: 3.1vw;
     margin-right: 0.2em;
+    margin-left: 1.4vw;
+    flex-grow: 2;
+}
+
+.subtitle {
+    font-size: 65%;
+    color: #999999;    
 }
 
 .container-separator {
@@ -81,6 +80,9 @@ h1 {
 
 .header-container {
     display: inline;
+    color: #FFFFFF;
+    font-family: 'Alegreya Sans', sans-serif;
+    font-size: 130%;
 }
 
 .topicon {
@@ -93,9 +95,7 @@ h1 {
 }
 
 #header-right-container {
-    display: inline;
-    vertical-align: middle;
-    white-space:nowrap;
+    margin-right: 1.4vw;
 }
 
 #clock-container {

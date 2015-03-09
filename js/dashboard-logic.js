@@ -685,9 +685,6 @@ $(function() {
       var dayname = days[d.getDay()];
       $("#date").html("{0}. {1}, {2}".format(day, month, dayname));
 
-      // update the header_container
-      setTimeout(function() { recalculate_header_positions(); }, 100);
-
     }
 
     // sprintf like formatting
@@ -937,8 +934,6 @@ $(function() {
               $('#{0}'.format(type)).html("N/A");
             }          
           });
-          // update the header_container
-          setTimeout(function() { recalculate_header_positions(); }, 100);
         }
         // do the ajax call
         ajaxCall($.personnel_url, 'GET', null, successAction);
@@ -958,9 +953,6 @@ $(function() {
             }
             // set the value  
             $('#lastok').html(data["duration_human"]);
-
-            // update the header_container
-            setTimeout(function() { recalculate_header_positions(); }, 100);
           }
           // do the ajax call
           ajaxCall($.lastok_url, 'GET', null, successAction);
@@ -1207,17 +1199,6 @@ $(function() {
       }
     };
 
-    // adjust the width of the spacer element to so that the header information is right justified
-    function recalculate_header_positions() {
-      var header_container = $('#header-right-container');
-      $("#spacer").css("margin-left", "1px");
-      var space_left = Math.round($(window).width() - header_container.offset().left - header_container.outerWidth());
-      $("#spacer").css("margin-left", "+={0}".format(space_left - 15));
-
-      $("#spacer").unbind();
-      header_container.unbind();
-    };
-
     // ensure that only one copy can exist of a given counter
     $.myTimeout = function (name, func, duration) {
       if ($.timers === undefined) {
@@ -1262,7 +1243,7 @@ $(function() {
           // set the window title and dashboard name in the header
           document.title = $.config["page_title"];
           if ($.config["dashboard_name_minor"] != "") {
-            $(".main-title").html("{0} <small>{1}</small>".format($.config["dashboard_name_major"], $.config["dashboard_name_minor"]));
+            $(".main-title").html("{0} <span class='subtitle'>{1}</span>".format($.config["dashboard_name_major"], $.config["dashboard_name_minor"]));
           } else {
             $(".main-title").html($.config["dashboard_name_major"]);
           }
@@ -1335,13 +1316,9 @@ $(function() {
     show_date();
     var timer_show_date = setInterval(function () { show_date(); }, 1000 * 60 * 60);
 
-    // recalculate header positions after init
-    var timer_recalculate_header_positions = setTimeout(function() { recalculate_header_positions(); }, 500);
-
     // on resize of the window call recalculate again
     // use debounce from underscore.js to avoid bouncing effect
     // http://stackoverflow.com/a/17754746
-    $( window ).resize( _.debounce(recalculate_header_positions, 200) );
     $( window ).resize( _.debounce(detect_display_options, 200) );
 
     // set the initial freshness timestamp
