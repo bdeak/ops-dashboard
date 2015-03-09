@@ -24,10 +24,10 @@ $(function() {
     								<div class="service {service_hidden}">{service}</div> \
 									<div class="host">{host}</div> \
 									<div class="tag_holder"> \
-										<span class="dashtag dragable alert_active blink {alert_active_hidden}">alert active</span> \
-										<span class="dashtag dragable is_flapping {is_flapping_hidden}">flapping</span> \
-										<span class="dashtag dragable is_soft {is_soft_hidden}">SOFT</span> \
-										<span class="dashtag dragable">{duration}</span> \
+										<span class="dashtag alert_active blink {alert_active_hidden}">alert active</span> \
+										<span class="dashtag is_flapping {is_flapping_hidden}">flapping</span> \
+										<span class="dashtag is_soft {is_soft_hidden}">SOFT</span> \
+										<span class="dashtag">{duration}</span> \
 									</div> \
 								</div> \
 							</div>'
@@ -846,6 +846,8 @@ $(function() {
       var scale_factor_text_tag = 0.15;
       // space between service and host text
       var scale_factor_margin_service_host = -0.05;
+      // offset for host name for host problems
+      var scale_factor_margin_host = 0.05;
       // padding of the service text on the top
       var scale_factor_padding_service_top = 0.04;
       // padding of the service text on the right
@@ -874,6 +876,9 @@ $(function() {
       style_data['.host'] = {};
       style_data['.host']['font-size'] = Math.round($.tile_sizey * scale_factor_text_host) + "px";
       style_data['.host']['margin-top'] = Math.round($.tile_sizey * scale_factor_margin_service_host) + "px";
+      style_data['.alert-down .host'] = {};
+      style_data['.alert-down .host']['font-size'] = Math.round($.tile_sizey * scale_factor_text_service) + "px";
+      style_data['.alert-down .host']['margin-top'] = Math.round($.tile_sizey * scale_factor_margin_host) + "px";
       style_data['.dashtag'] = {};
       style_data['.dashtag']['font-size'] = Math.round($.tile_sizey * scale_factor_text_tag) + "px";
       style_data['.dashtag']['padding'] = "{0}px {1}px {0}px {1}px".format(Math.round($.tile_sizey * scale_factor_tag_padding_vertical), Math.round($.tile_sizey * scale_factor_tag_padding_horizontal));

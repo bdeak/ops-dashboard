@@ -211,7 +211,6 @@ h1 {
 
 .service {
     display: block;
-    /* any text that overflows should be hidden */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
