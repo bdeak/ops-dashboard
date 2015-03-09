@@ -91,9 +91,16 @@ $(function() {
             $.alert_data = $.alert_data || [];
 
             successAction = function(data, status, xhr) {
+                var service_displayed = "";
                 $.each(data, function(index, obj) {
+                    try {
+                        service_displayed =  
+                        (obj.service.length > 0 ? obj.service : "N/A");
+                    } catch (err) {
+                        service_displayed = "N/A";
+                    }
                     $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state});
-                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), obj.service, obj.host, obj.state, obj.priority));
+                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, obj.host, obj.state, obj.priority));
                 });
 
                 init_typeahead("service");
@@ -184,45 +191,27 @@ $(function() {
         });
     });
 
-
-    //$('#add-data').click(function () {
-    //    //var priority = $("#data_priority").val();
-    //    var priority = "";
-    //    var service = $("#data_service").val();
-    //    var host = $("#data_host").val();
-    //    var state = $("#data_state").val();
-    //    if (check_alert_stored(host, service) === false) {
-    //        if (service.length && host.length) {
-    //            $.alert_data.push({priority: priority, service: service, host: host, state: state});
-    //            $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
-    //            init_typeahead("service");
-    //            init_typeahead("host");
-    //            //init_typeahead("state");
-    //        } else {
-    //            $("#alert-modal .modal-body").html("Please provide a value for 'Service' and 'Host'");
-    //            $('#alert-modal').modal('show'); 
-    //        }
-    //    } else {
-    //        $("#alert-modal .modal-body").html("Service/host combination already added");
-    //        $('#alert-modal').modal('show');            
-    //    }
-    //});
-
     $('#add-data').click(function () {
         //var priority = $("#data_priority").val();
         var priority = "";
-        var service_pattern = $("#data_service").val();
+        var service_pattern = $("#data_service").val() || "";
         var host_pattern = $("#data_host").val();
         var state = $("#data_state").val();
         var num_to_add = $("#data_number_to_add").val();
         var num_services;
         var num_hosts;
 
-        // check if both patterns are filled
-        if (!(service_pattern.length && host_pattern.length)) {
-            $("#alert-modal .modal-body").html("Please provide a value for 'Service pattern' and 'Host pattern'");
+        // check if host pattern is filled
+        if (! host_pattern.length) {
+            $("#alert-modal .modal-body").html("Please provide a value for 'Host pattern'");
             $('#alert-modal').modal('show');
             return false;
+        }
+
+        if (service_pattern.match(/_$/) && host_pattern.match(/_$/)) {
+            $("#alert-modal .modal-body").html("Only one of host or service patterns may contain a placeholder!");
+            $('#alert-modal').modal('show');
+            return false;   
         }
 
         // check how many of the hosts/services we need
@@ -244,10 +233,17 @@ $(function() {
             for (var service_counter = 0 ; service_counter < num_services ; service_counter++) {
                 var host = host_pattern.replace(/_$/, host_counter + 1);
                 var service = service_pattern.replace(/_$/, service_counter + 1);
-
+                
+                // override state to be "DOWN", for hosts, nothing else makes sense
+                if (service === undefined || service.length == 0) {
+                    state = "down";
+                }
+                
                 if (check_alert_stored(host, service) === false) {
-                        $.alert_data.push({priority: priority, service: service, host: host, state: state});
-                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service, host, state, priority));
+                        var type = (service.length > 0 ? "service" : "host");
+                        var service_displayed = (service.length > 0 ? service : "N/A");
+                        $.alert_data.push({priority: priority, service: service, host: host, state: state, type: type});
+                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, host, state, priority));
                         init_typeahead("service");
                         init_typeahead("host");
                         //init_typeahead("state");

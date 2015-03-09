@@ -1,11 +1,8 @@
 $(function() {
-    //
-    // GENERATE MESSAGE OBJECT
-    //
+
     function makeMessage(object, id, index, left, top) {
-        var timeout = index * $.timeout_base;
-        var msg = "";
         var state;
+
         // use the bootstrap compatible state names
         if (object["status"] == "WARNING") {
           state = "warn";
@@ -18,52 +15,48 @@ $(function() {
         } else {
           state = "info";
         }
-        // tile container
-        msg = '<div id="{0}" class="galaxy-frame dragable">\n'.format(id);
-        msg += '  <div id="{0}" class="alert alert-{1} tile dragable">\n'.format(id, state);
-        // show or hide the priority via a css class
 
-        // priority label
-        if (object['priority'] == 0) {
-        msg += '    <div class="priority dragable hidden">{0}</div>\n'.format(object["priority"]);
-        } else {
-        msg += '    <div class="priority dragable">{0}</div>\n'.format(object["priority"]);
-        }
-        // service name (if present)
-        if (object["type"] == "service") {
-          // do some search & replace on the service text
-          var service = object['service'].replace(/^Systemcheck/, "SC:");
-          msg += '    <div class="service dragable">{0}</div>\n'.format(service);
-        }
-        // hostname
-        msg += '    <div class="host dragable">{0}</div>\n'.format(object["host"]);
-        // tag holder container
-        msg += '    <div class="tag_holder dragable">\n';
-        // if there's an active alert, show a tag
-        if (object["alert_active"]) {
-          // show that there's an active alert triggered
-          msg += '    <span class="dashtag dragable alert_active blink">alert active</span>\n';
-        } else {
-          // hide the alert tag using the 'hidden' css class.. this is needed for easier removal/adding of the tag
-          msg += '    <span class="dashtag dragable alert_active hidden">alert active</span>\n';
-        }
-        if (object["is_flapping"]) {
-          msg += '    <span class="dashtag dragable is_flapping">flapping</span>\n';
-        } else {
-          msg += '    <span class="dashtag dragable is_flapping hidden">flapping</span>\n';
-        }
-        if (object["is_soft"]) {
-          msg += '    <span class="dashtag dragable is_soft">SOFT</span>\n';
-        } else {
-          msg += '    <span class="dashtag dragable is_soft hidden">SOFT</span>\n';
-        }              
-        // show the duration tag
-        msg += '    <span class="dashtag dragable duration">{0}</span>\n'.format(object["duration"]);
-        msg += '    </div>\n';
-        // show position with a comment, for debug purposes
-        msg += '    <!-- index: {0}, left: {1}, top: {2} -->\n'.format(index, left, top);
-        msg += '   </div>\n';
-        msg += '  </div>\n';
+        // template for the message
+        var msg_template = '<div id="{id}" class="galaxy-frame"> \
+        						<!-- index: {index}, left: {left}, top: {top} --> \
+        						<div id="{id}" class="alert alert-{state} tile"> \
+        							<div class="priority {priority_hidden}">{priority}</div> \
+    								<div class="service {service_hidden}">{service}</div> \
+									<div class="host">{host}</div> \
+									<div class="tag_holder"> \
+										<span class="dashtag dragable alert_active blink {alert_active_hidden}">alert active</span> \
+										<span class="dashtag dragable is_flapping {is_flapping_hidden}">flapping</span> \
+										<span class="dashtag dragable is_soft {is_soft_hidden}">SOFT</span> \
+										<span class="dashtag dragable">{duration}</span> \
+									</div> \
+								</div> \
+							</div>'
+
+		var priority_hidden = (object['priority'] == 0 ? "hidden" : "");
+		var alert_active_hidden = (object['alert_active'] == 0 ? "hidden" : "");
+		var is_flapping_hidden = (object['is_flapping'] == 0 ? "hidden" : "");
+		var is_soft_hidden = (object['is_soft'] == 0 ? "hidden" : "");
+		var service_hidden = (object['type'] == "service" ? "" : "hidden");
+
+		// fill the template with values
+		var msg = msg_template.format_by_name({
+			id: id,
+			index: index,
+			left: left,
+			top: top,
+			state: state,
+			priority_hidden: priority_hidden,
+			priority: object["priority"],
+			service_hidden: service_hidden,
+			service: object['service'].replace(/^Systemcheck/, "SC:"),
+			host: object["host"],
+			alert_active_hidden: alert_active_hidden,
+			is_flapping_hidden: is_flapping_hidden,
+			is_soft_hidden: is_soft_hidden,
+			duration: object["duration"],
+
+		});
+
         // send an add element to the queue
         var element = {
           options: {

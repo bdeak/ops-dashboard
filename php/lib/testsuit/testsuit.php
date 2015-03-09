@@ -31,6 +31,7 @@ function get_testsuit_data_sqlite () {
 		$res["service"] = $entry["service"];
 		$res["host"] = $entry["host"];
 		$res["state"] = $entry["state"];
+		$res["type"] = $entry["type"];
 		array_push($result, $res);
 	}
 	$sqlite->close();
@@ -78,7 +79,7 @@ function add_testsuit_data_sqlite ($data) {
 	foreach($data as $value) {
 		# use prepared statements to ensure no SQL injection can be done
 		try {
-			$statement = $sqlite->prepare("INSERT INTO testsuit VALUES (NULL, :priority, :service, :host, :state)");
+			$statement = $sqlite->prepare("INSERT INTO testsuit VALUES (NULL, :priority, :service, :host, :state, :type)");
 		} catch (Exception $e) {
 			throw new Exception("Can't prepare statement for inserting into testsuit: ". $e);
 		}
@@ -88,6 +89,7 @@ function add_testsuit_data_sqlite ($data) {
 			$statement->bindValue(':service', $value["service"], SQLITE3_TEXT);
 			$statement->bindValue(':host', $value["host"], SQLITE3_TEXT);
 			$statement->bindValue(':state', $value["state"], SQLITE3_TEXT);
+			$statement->bindValue(':type', $value["type"], SQLITE3_TEXT);
 		} catch (Exception $e) {
 			throw new Exception("Failed to bind values for prepared statement: ". $e);
 		}
