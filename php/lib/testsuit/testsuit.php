@@ -27,7 +27,7 @@ function get_testsuit_data_sqlite () {
 	while ($entry = $query_result->fetchArray(SQLITE3_ASSOC)) {
 		$res = Array();
 		$res["id"] = $entry["id"];
-		$res["priority"] = $entry["priority"];
+		$res["priority"] = (int) $entry["priority"];
 		$res["service"] = $entry["service"];
 		$res["host"] = $entry["host"];
 		$res["state"] = $entry["state"];
@@ -85,7 +85,7 @@ function add_testsuit_data_sqlite ($data) {
 		}
 
 		try {
-			$statement->bindValue(':priority', $value["priority"], SQLITE3_TEXT);
+			$statement->bindValue(':priority', (int) $value["priority"], SQLITE3_TEXT);
 			$statement->bindValue(':service', $value["service"], SQLITE3_TEXT);
 			$statement->bindValue(':host', $value["host"], SQLITE3_TEXT);
 			$statement->bindValue(':state', $value["state"], SQLITE3_TEXT);

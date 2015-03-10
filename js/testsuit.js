@@ -129,9 +129,10 @@ $(function() {
     }
 
     function build_row_content(index, service, host, state, priority, type) {
-        return "<tr id='row-{0}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4} {5}</td></tr>"
+        return "<tr id='row-{0}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5} {6}</td></tr>"
                 .format(
                     index,
+                    priority,
                     service,
                     host,
                     state,
@@ -193,7 +194,7 @@ $(function() {
 
     $('#add-data').click(function () {
         //var priority = $("#data_priority").val();
-        var priority = "";
+        var priority = $("#data_priority").val() || 0;
         var service_pattern = $("#data_service").val() || "";
         var host_pattern = $("#data_host").val();
         var state = $("#data_state").val();

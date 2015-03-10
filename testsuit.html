@@ -42,6 +42,13 @@
                     <option value="unknown">unknown</option>
                     <option value="down">down</option>
                 </select>
+                <select id="data_priority" class="selectpicker form-control" style="padding-top: 10px;" data-width="auto">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
                 <input id="data_number_to_add" type="text" class="form-control" placeholder="Number of tiles" value="10" name="data_number_to_add" data-toggle="tooltip" title="Number of tiles to add" style="width: 4em; text-align: right;">                
                 <button type="button" id="add-data" class="btn btn-primary">Add new entries</button>
             </form>
@@ -55,6 +62,7 @@
             <table id="data_holder" class="table table-hover medium-wide">
                 <tr>
                     <th>Index</th>
+                    <th>Priority</th>
                     <th>Service</th>
                     <th>Host</th>
                     <th>State</th>
