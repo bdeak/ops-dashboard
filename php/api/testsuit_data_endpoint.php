@@ -36,6 +36,7 @@ foreach ($data as $value) {
 		"duration" => "1m", #FIXME
 		"state_type" => "SOFT", #FIXME
 		"is_flapping" => false, #FIXME
+		"status_information" => "Dummy service output",
 	);
 	array_push($result["status"]["service_status"], $element);
 }

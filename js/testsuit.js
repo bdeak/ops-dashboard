@@ -99,8 +99,8 @@ $(function() {
                     } catch (err) {
                         service_displayed = "N/A";
                     }
-                    $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state});
-                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, obj.host, obj.state, obj.priority));
+                    $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state, type: obj.type});
+                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, obj.host, obj.state, obj.priority, obj.type));
                 });
 
                 init_typeahead("service");
@@ -128,15 +128,15 @@ $(function() {
         return false;
     }
 
-    function build_row_content(index, service, host, state, priority) {
-        return "<tr id='row-{5}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3} {4}</td></tr>"
+    function build_row_content(index, service, host, state, priority, type) {
+        return "<tr id='row-{0}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4} {5}</td></tr>"
                 .format(
                     index,
                     service,
                     host,
                     state,
-                    '<button type="button" class="close">x</button>',
-                    index
+                    type,
+                    '<button type="button" class="close">x</button>'
                 );
     }
 
@@ -243,7 +243,7 @@ $(function() {
                         var type = (service.length > 0 ? "service" : "host");
                         var service_displayed = (service.length > 0 ? service : "N/A");
                         $.alert_data.push({priority: priority, service: service, host: host, state: state, type: type});
-                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, host, state, priority));
+                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, host, state, priority, type));
                         init_typeahead("service");
                         init_typeahead("host");
                         //init_typeahead("state");

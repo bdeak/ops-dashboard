@@ -49,153 +49,30 @@
             <button type="button" id="clear-data" class="btn btn-danger" style="display: inline; margin-top: 10px">Clear testsuit</button>
         </div>
 
-            <!--
-            <form class="form-inline" role="form">
-                
-                        <select class="form-control formsize">
-                            <option>NA</option>
-                            <option>RU</option>
-                            <option>EU</option>
-                            <option>SEA</option>
-                        </select> 
-                        <input type="text" placeholder="Name" class="form-control formsize" maxlength="5">
-                        <button type="submit" class="btn btn-primary">Go To Login »</button>
-                
-            </form>
-            </div>
-            </div>
-            -->
 
-<!--
-    <div class="input-group">
-        <input type="text" id="data_service" class="typeahead form-control input-sm" placeholder="Service" />
-        <span class="input-group-btn" style="width:0px;"></span>
-        <input type="text" id="data_host" class="typeahead form-control input-sm" placeholder="Host" style="margin-left:-1px" />
-        <span class="input-group-btn" style="width:0px;"></span>
-        <select id="data_state" class="form-control input-sm" data-width="auto" style="margin-left:-2px">
-            <option value="critical" selected>critical</option>
-            <option value="warning">warning</option>
-            <option value="unknown">unknown</option>
-            <option value="down">down</option>
-        </select>
-    </div>
--->
-
-    <!--
-        <form name="data">
-            
-            <div class="form-group" style="position: relative;">
-                <div id="data_service_holder" style="float: left;">
-                    <input type="text" id="data_service" class="typeahead form-control" placeholder="Service" style="position: absolute; top: 0px; float: left;">
-                </div>
-                <div id="data_host_holder" style="float: left;">
-                    <input type="text" id="data_host" class="typeahead form-control" placeholder="Host" style="position: absolute; top: 0px; float: left;">
-                </div>
-            </div>
-            <div class="clearfix"></div>
-            <div class="form-group" style="position: relative;">
-                <div id="data_service_pattern_holder" style="float: left;">
-                    <input type="text" id="data_service_pattern" class="typeahead form-control" placeholder="Service pattern" style="position: absolute; top: 0px; float: left;">
-                </div>
-                <div id="data_host_pattern_holder" style="float: left;">
-                    <input type="text" id="data_host_pattern" class="typeahead form-control" placeholder="Host pattern" style="position: absolute; top: 0px; float: left;">
-                </div>
-            </div>
-
-        </form>
-    -->
-            <!--
-            <div id="data_state_holder" style="float: left;">
-                <select id="data_state" class="selectpicker form-control" style="padding-top: 10px;" data-width="auto" style="position: absolute; top: 0px; float: left;">
-                    <option value="critical" selected>critical</option>
-                    <option value="warning">warning</option>
-                    <option value="unknown">unknown</option>
-                    <option value="down">down</option>
-                </select>
-            </div>
-            -->
-            <!-- <input type="text" id="data_state" class="typeahead form-control" value="warning">-->
-            <!--
-            <button type="button" id="add-data" class="btn btn-default">Add new entry</button>
-            
+        <div class="spacer"></div>
+        <div id='everything'>
+            <table id="data_holder" class="table table-hover medium-wide">
+                <tr>
+                    <th>Index</th>
+                    <th>Service</th>
+                    <th>Host</th>
+                    <th>State</th>
+                    <th>Type</th>
+                </tr>
+            </table>
         </div>
-        -->
-<!--
-        <div class="form-group" style="display: block; position: relative;">
-            <div id="batch_add_holder" style="float: left;">
-                <input type="text" id="service_pattern" class="typeahead form-control" placeholder="Service pattern" style="display: inline;">
-                <input type="text" id="host_pattern" class="typeahead form-control" placeholder="Host pattern" style="display: inline;">
-            </div>
-        </div>
--->
-   <!--     </form>
-      <form name="data" class="form-inline">
-        <div class="form-group" style="position: relative;">
-            <div id="service_pattern_holder" style="float: left;">
-                <input type="text" id="data_service_pattern" class="typeahead form-control" placeholder="Service pattern" style="position: absolute; top: 0px; float: left;">
-            </div>
-            <div id="host_pattern_holder" style="float: left;">
-                <input type="text" id="data_host_pattern" class="typeahead form-control" placeholder="Host pattern" style="position: absolute; top: 0px; float: left;">
-            </div>
-            <div id="data_state_pattern_holder" style="float: left;">
-                <select id="data_state_pattern" class="selectpicker form-control" style="padding-top: 10px;" data-width="auto" style="position: absolute; top: 0px; float: left;">
-                    <option value="critical" selected>critical</option>
-                    <option value="warning">warning</option>
-                    <option value="unknown">unknown</option>
-                    <option value="down">down</option>
-                </select>
-            </div>
-            <input id="data_number_to_add" type="text" value="10" name="data_number_to_add" style="width: 7em;">
-            <script>
-                $("input[name='data_number_to_add']").TouchSpin({
-                  verticalbuttons: true,
-                  verticalupclass: 'glyphicon glyphicon-plus',
-                  verticaldownclass: 'glyphicon glyphicon-minus'
-                });
-            </script>
-            -->
-            <!-- <input type="text" id="data_state" class="typeahead form-control" value="warning">-->
-            <!--
-            <button type="button" id="add-data-patternbased" class="btn btn-default">Add entries</button>
-            -->
-        <!--</div>-->
-<!--
-        <div class="form-group" style="display: block; position: relative;">
-            <div id="batch_add_holder" style="float: left;">
-                <input type="text" id="service_pattern" class="typeahead form-control" placeholder="Service pattern" style="display: inline;">
-                <input type="text" id="host_pattern" class="typeahead form-control" placeholder="Host pattern" style="display: inline;">
-            </div>
-        </div>
--->
-        
-<!--
-        <button type="button" id="send-data" class="btn btn-success" style="display: block;">Send Data</button>
-        <button type="button" id="clear-data" class="btn btn-danger" style="display: block;">Clear testsuit</button>
--->
-
-            <div class="spacer"></div>
-            <div id='everything'>
-                <table id="data_holder" class="table table-hover medium-wide">
-                    <tr>
-                        <th>Index</th>
-                        <th>Service</th>
-                        <th>Host</th>
-                        <th>State</th>
-                    </tr>
-                </table>
-            </div>
-            <!-- Small modal -->
-            <div id="alert-modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">x</button>
-                        <h4 class="modal-title" id="mySmallModalLabel">Information</h4>
-                    </div>
-                    <div class="modal-body"></div>
+        <!-- Small modal -->
+        <div id="alert-modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">x</button>
+                    <h4 class="modal-title" id="mySmallModalLabel">Information</h4>
                 </div>
-              </div>
-            </div>        
-        </div>
+                <div class="modal-body"></div>
+            </div>
+          </div>
+        </div>        
   </body>
 </html>

@@ -18,7 +18,7 @@ function get_testsuit_data_sqlite () {
 	$sqlite = get_sqlite_conn($config["dashboard_db"], $config["sqlite_timeout"]);
 
 	# get the personnel, and return it as a string
-	$query = "SELECT id, priority, service, host, state FROM testsuit ORDER BY id ASC";
+	$query = "SELECT id, priority, service, host, state, type FROM testsuit ORDER BY id ASC";
 
 	$query_result = $sqlite->query($query);
 	
