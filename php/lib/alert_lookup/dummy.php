@@ -12,7 +12,7 @@ require_once(dirname(__FILE__)."/../sqlite.php");
 #	for hosts:
 # 		$states["host"][$hostname] = 1
 #	for services:
-#		$states["service"][$hostname][$service] = 1
+#		$states["service"][$hostname . "!" . $service] = 1
 
 function get_alert_data_dummy() {
 	

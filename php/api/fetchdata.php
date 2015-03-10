@@ -36,21 +36,52 @@ if ($config["cache_ttl_status"] == 0) {
 	apc_clear_cache("user");
 }
 
+# get the alert information, using the defined backend type
+$statuses = null;
+$lookup_method = $config["status"]["backend_type"];
+$lookup_func = sprintf("get_status_data_%s", $lookup_method);
+# check if the given function exists
+if (! function_exists($lookup_func)) {
+	handle_error("Lookup function '$lookup_func' is not defined for status lookup method '$lookup_method'!");
+}
+
+# get the state information from the sqlite database
+$l->info("Getting the status data using lookup method '$lookup_method'");
+$statuses = apc_fetch(get_apc_hash_key("status"));
+if ($statuses !== false) {
+	# found in cache
+	$l->info("Found the alert history information in the cache");
+} else {
+	$statuses = call_user_func("$lookup_func");
+	# check again to see if it hasn't been put there by another process
+	$result = apc_delete(get_apc_hash_key("status"));
+	if ($result === true) {
+		$l->info("Deleted cache entry for 'status'");
+	}
+	$result = apc_add(get_apc_hash_key("status"), $statuses, $config["cache_ttl_status"]);
+	if ($result === true) {
+		$l->warn("Successfully stored status information in the cache");
+	} else {
+		$l->warn("Failed to store status information in the cache, most likely it was stored by another process");
+	}
+}
+
+
 # get the priority information, if an external source is needed (servicegroup membership for example)
-if ($config["priority_lookup_enabled"] === true && $config["priority_lookup_method"] != "namebased") {
+if ($config["priority_lookup"]["enabled"] === true) {
 	# check if the data is already in the APC cache
 	$priorities = apc_fetch(get_apc_hash_key("priorities"));
 	if ($priorities !== false) {
 		# found it in the cache
 		$l->info("Found the priorities data in the cache");
 	} else {
-		$lookup_method = $config["priority_lookup_method"];
+		$lookup_method = $config["priority_lookup"]["method"];
 		$lookup_func = sprintf("get_priority_data_%s", $lookup_method);
 		# check if the given function exists
 		if (! function_exists($lookup_func)) {
 			handle_error("Lookup function '$lookup_func' is not defined for lookup method '$lookup_method'!");
 		}
-		$priorities = call_user_func("$lookup_func");
+		$priorities = call_user_func_array("$lookup_func", Array(&$statuses));
 		$result = apc_delete(get_apc_hash_key("priorities"));
 		if ($result === true) {
 			$l->debug("Deleted cache entry for 'priorities'");
@@ -94,33 +125,24 @@ if ($config["alert_lookup_enabled"] === true) {
 	}
 }
 
-# get the alert information, using the defined backend type
-$statuses = null;
-$lookup_method = $config["status"]["backend_type"];
-$lookup_func = sprintf("get_status_data_%s", $lookup_method);
-# check if the given function exists
-if (! function_exists($lookup_func)) {
-	handle_error("Lookup function '$lookup_func' is not defined for status lookup method '$lookup_method'!");
+# add the alert history and priorities information into the statuses array
+if ($priorities !== null) {
+	foreach ($priorities as $type => $value) {
+		foreach ($priorities[$type] as $key => $value) {
+			if (array_key_exists(md5($key), $statuses["status"])) {
+				$statuses["status"][md5($key)]["priority"] = $value;
+			}
+		}
+	}
 }
 
-# get the state information from the sqlite database
-$l->info("Getting the status data using lookup method '$lookup_method'");
-$statuses = apc_fetch(get_apc_hash_key("status"));
-if ($statuses !== false) {
-	# found in cache
-	$l->info("Found the alert history information in the cache");
-} else {
-	$statuses = call_user_func("$lookup_func", $priorities, $alert_history);
-	# check again to see if it hasn't been put there by another process
-	$result = apc_delete(get_apc_hash_key("status"));
-	if ($result === true) {
-		$l->info("Deleted cache entry for 'status'");
-	}
-	$result = apc_add(get_apc_hash_key("status"), $statuses, $config["cache_ttl_status"]);
-	if ($result === true) {
-		$l->warn("Successfully stored status information in the cache");
-	} else {
-		$l->warn("Failed to store status information in the cache, most likely it was stored by another process");
+if ($alert_history !== null) {
+	foreach ($alert_history as $type => $value) {
+		foreach ($alert_history[$type] as $key => $value) {
+			if (array_key_exists($statuses["status"][md5($key)])) {
+				$statuses["status"][md5($key)]["priority"] = $value;
+			}
+		}
 	}
 }
 

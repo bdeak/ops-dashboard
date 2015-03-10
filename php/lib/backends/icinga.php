@@ -12,7 +12,7 @@ foreach (glob(dirname(__FILE__)."/../sort_methods/*.php") as $filename)
     require_once $filename;
 }
 
-function get_status_data_icinga($priorities, $alert_history) {
+function get_status_data_icinga() {
 	global $config;
 
 	$l = get_logger("dashboard");
@@ -73,47 +73,6 @@ function get_status_data_icinga($priorities, $alert_history) {
 				$duration = preg_replace("/ [0-9]{1,2}s$/", "", $duration);
 				# convert the duration to seconds (for sorting)
 				$duration_seconds = convert_duration_to_seconds($value["duration"]);
-				if ($priorities !== null && array_key_exists($type, $priorities)) {
-					if ($type == "service") {
-						# get priority
-						if (array_key_exists($host . "!" . $service, $priorities["service"])) {
-							$priority = $priorities["service"][$host . "!" . $service];
-						} else {
-							$priority = 0;
-						}
-						
-
-					} else {
-						# get priority
-						if (array_key_exists($host, $priorities["host"])) {
-							$priority = $priorities["host"][$host];
-						} else {
-							$priority = 0;
-						}
-					}
-				} else {
-					$priority = 0;
-				}
-
-				if ($alert_history !== null && array_key_exists($type, $alert_history)) {
-					if ($type == "service") {
-						# check open alerts
-						if (($alert_history != null) && (array_key_exists($host, $alert_history["service"])) && (array_key_exists($service, $alert_history["service"][$host]))) {
-							$alert_active = true;
-						} else {
-							$alert_active = false;
-						}
-					} else {
-						# check open alerts
-						if (($alert_history != null) && (array_key_exists($host, $alert_history["host"]))) {
-							$alert_active = true;
-						} else {
-							$alert_active = false;
-						}
-					}
-				} else {
-					$alert_active = false;
-				}
 
 				# push all elements in a temporary array that will allow sorting
 				$element = Array();
@@ -123,11 +82,11 @@ function get_status_data_icinga($priorities, $alert_history) {
 				}
 				$element["status_information"] = $status_information;
 				$element["status"] = $status;
-				$element["priority"] = (int) substr($priority, -1); 
+				$element["priority"] = 0; # added later in fetchdata.php
 				$element["duration"] = $duration;
 				$element["duration_seconds"] = $duration_seconds;
 				$element["type"] = $type;
-				$element["alert_active"] = $alert_active;
+				$element["alert_active"] = false; # added later in fetchdata.php
 				$element["is_flapping"] = $value["is_flapping"];
 				if ($value["state_type"] == "SOFT") {
 					$element["is_soft"] = true;
@@ -155,7 +114,7 @@ function get_status_data_icinga($priorities, $alert_history) {
 		#$l->debug("Doing with index $index");
 		#print_r($k);
 		if ($k["type"] == "service") {
-			$md5id = md5($k["host"] . ":" . $k["service"]);
+			$md5id = md5($k["host"] . "!" . $k["service"]);
 		} else {
 			$md5id = md5($k["host"]);
 		}
