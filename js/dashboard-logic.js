@@ -1282,7 +1282,7 @@ $(function() {
 
     /* ============================== entry point =================================*/
 
-    $.monitor_dataurl = "{0}/php/api/fetchdata_icinga.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
+    $.monitor_dataurl = "{0}/php/api/fetchdata.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
     //$.monitor_dataurl = "{0}/tmp.json".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));
     $.personnel_url = "{0}/php/api/get_dashboard_data.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));   
     $.getconfig_url = "{0}/php/api/expose_configuration.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
