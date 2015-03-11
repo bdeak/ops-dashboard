@@ -215,6 +215,13 @@ $(function() {
             return false;   
         }
 
+        if (service_pattern.length > 0 && state == "down") {
+            $("#alert-modal .modal-body").html("Either clear the service pattern field, or choose a state that is not 'down'");
+            $('#alert-modal').modal('show');
+            return false;   
+        }
+
+
         // check how many of the hosts/services we need
         if (service_pattern.match(/_$/)) {
             num_services = num_to_add;
