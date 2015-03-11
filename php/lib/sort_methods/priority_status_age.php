@@ -9,6 +9,7 @@ require_once(dirname(__FILE__)."/sort_order_status.php");
 # implement the sorting method
 function cmp_priority_status_age ($a, $b) {
 	global $config, $sort_order_status;
+
 	if ($a["type"] == $b["type"]) {
 		if ($a["priority"] == $b["priority"]) {
 			# prios are the same, sort by state

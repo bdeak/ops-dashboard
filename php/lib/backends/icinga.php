@@ -6,12 +6,6 @@
 require_once(dirname(__FILE__).'/../common.php');
 require_once(dirname(__FILE__)."/../../../config/config.php");
 
-# require all alert_lookup functions
-foreach (glob(dirname(__FILE__)."/../sort_methods/*.php") as $filename)
-{
-    require_once $filename;
-}
-
 function get_status_data_icinga() {
 	global $config;
 
@@ -100,16 +94,6 @@ function get_status_data_icinga() {
 		}
 	}
 
-	$sort_method_func = sprintf('cmp_%s', $config["sort_method"]);
-	if (! function_exists($sort_method_func)) {
-		handle_error(sprintf("Function '%s' doesn't exist for sorting method '%s'!", $sort_method_func, $config["sort_method"]));
-	}
-
-	# sort the source array
-	uasort($temp_store, $sort_method_func);
-
-	# create the $statuses array, in a sorted way
-	$index = 1;
 	foreach ($temp_store as $k) {
 		#$l->debug("Doing with index $index");
 		#print_r($k);
@@ -130,15 +114,14 @@ function get_status_data_icinga() {
 		$statuses["status"][$md5id]["duration"] = $k["duration"];
 		$statuses["status"][$md5id]["duration_seconds"] = $k["duration_seconds"];	
 		$statuses["status"][$md5id]["md5id"] = $md5id;
-		$statuses["status"][$md5id]["index"] = $index;
 		$statuses["status"][$md5id]["type"] = $k["type"];
 		$statuses["status"][$md5id]["alert_active"] = $k["alert_active"];
 		$statuses["status"][$md5id]["is_flapping"] = $k["is_flapping"];
 		$statuses["status"][$md5id]["is_soft"] = $k["is_soft"];
 
-		$index += 1;
 	}
-	$statuses["metadata"] = $metadata;
+ 
+    $statuses["metadata"] = $metadata;
 
 	return $statuses;
 

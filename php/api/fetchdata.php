@@ -19,6 +19,12 @@ foreach (glob(dirname(__FILE__)."/../lib/backends/*.php") as $filename)
     require_once $filename;
 }
 
+# require all sort methods
+foreach (glob(dirname(__FILE__)."/../lib/sort_methods/*.php") as $filename)
+{
+    require_once $filename;
+}
+
 header('Content-type: application/json');
 
 ###########################################################
@@ -65,7 +71,6 @@ if ($statuses !== false) {
 		$l->warn("Failed to store status information in the cache, most likely it was stored by another process");
 	}
 }
-
 
 # get the priority information, if an external source is needed (servicegroup membership for example)
 if ($config["priority_lookup"]["enabled"] === true) {
@@ -145,6 +150,35 @@ if ($alert_history !== null) {
 		}
 	}
 }
+
+# sort the statuses hash
+
+
+$sort_method_func = sprintf('cmp_%s', $config["sort_method"]);
+if (! function_exists($sort_method_func)) {
+	handle_error(sprintf("Function '%s' doesn't exist for sorting method '%s'!", $sort_method_func, $config["sort_method"]));
+}
+
+## sort the source array
+#$l->debug("before");
+#$statuses_sort = $statuses["status"];
+#$metadata = $statuses["metadata"];
+##$l->debug(print_r($statuses, true));
+##$statuses = $statuses["status"];
+uasort($statuses["status"], $sort_method_func);
+#$l->debug("after");
+##$l->debug(print_r($statuses, true));
+#
+#$statuses["status"] = $statuses_sort;
+#$statuses["metadata"] = $metadata;
+
+# go through the array and fill the index values
+$index = 1;
+foreach ($statuses["status"] as $md5 => $subhash) {
+	$statuses["status"][$md5]["index"] = $index;
+	$index++;
+}
+
 
 if ($config["show_last_ok"]) {
 	if (!file_exists($config["dashboard_db"])) {
