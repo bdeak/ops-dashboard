@@ -41,12 +41,12 @@ function get_priority_data_icinga_group_membership ($statuses) {
 				$group_name = strtolower($value["group_name"]);
 				# get the pattern and replacement strings from the configuration
 				$pattern = $config["priority_lookup"]["patterns"][0]["pattern"];
-				try {
-					$replacement = $config["priority_lookup"]["patterns"][0]["replacement"];
-				}
-				catch (Exception $e) {
+				if (array_key_exists("replacement", $config["priority_lookup"]["patterns"][0]) && isset($config["priority_lookup"]["patterns"][0]["replacement"])) {
+						$replacement = $config["priority_lookup"]["patterns"][0]["replacement"];
+				} else {
 					$replacement = '$1';
 				}
+
 				if (!preg_match($pattern, $group_name)) {
 					continue;
 				}
