@@ -165,6 +165,9 @@ if (! function_exists($sort_method_func)) {
 #$metadata = $statuses["metadata"];
 ##$l->debug(print_r($statuses, true));
 ##$statuses = $statuses["status"];
+if (!isset($statuses["status"])) {
+	$statuses["status"] = Array();	
+}
 uasort($statuses["status"], $sort_method_func);
 #$l->debug("after");
 ##$l->debug(print_r($statuses, true));

@@ -39,6 +39,7 @@ function handle_error ($msg, $type="hash") {
 	} else {
 		$result = "ERROR: $msg";
 	}
+	header('HTTP/1.1 500 Internal Server Error');
 	print json_encode($result);
 	die();
 }

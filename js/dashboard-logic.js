@@ -230,6 +230,13 @@ $(function() {
       }
     };
 
+    function delete_all_messages() {
+      if ($("#msg_container_main").children().length) {
+        console.debug("Deleting all messages");
+        $("#msg_container_main").fadeOut().empty();
+      }
+    };
+
     // delete the alerts that are no longer needed, in a reversed order (from bottom to top to avoid
     // senseless reordering of the grid)
     function delete_no_longer_needed_alerts (data) {
@@ -1003,13 +1010,6 @@ $(function() {
           return false;
         }
 
-        // check if the result is valid
-        if (($.monitor_data) && ("ERROR" in $.monitor_data)) {
-          show_message($.monitor_data["ERROR"]["message"], "msg_error", true);
-          $.myTimeout("worker", worker, 5000);
-          return false;
-        }
-
         if (($.metadata !== null) && ($.config["show_outdated"]["icinga"]["enabled"] === true)) {
           if ($.metadata["status_data_age"] > $.metadata["status_update_interval"] * parseInt($.config["show_outdated"]["icinga"]["threshold"])) {
             // data is outdated, show error message
@@ -1070,6 +1070,10 @@ $(function() {
         } else {
           // hide the all ok message
           show_message("Everything OK", "msg_big", false);
+          // delete all shown messages
+
+          delete_all_messages();
+          
           show_lastok();
           
           // add new alerts
@@ -1079,7 +1083,7 @@ $(function() {
           update_alert_information(data_shown);
         }
 
-        // add a queue entry for changing the number of columns - will do anything only if it's needed
+        // add a queue entry for changing the number of columns - will do something only if it's needed
         $.frame_manager.queue_add("external_function", {func_name: change_column_number_if_needed});
         $.frame_manager.queue_add("external_function", {
           func_name: show_infobar_if_needed,
@@ -1107,8 +1111,15 @@ $(function() {
 
         errorAction = function (xhr, status, error) {
           var statuscode = xhr.status;
-          // show the error message in a popup window
-          show_message("Error {0}: {1}".format(statuscode, error), "msg_error", true);
+          var responseText = $.parseJSON(xhr.responseText);
+          // check if there's a reason
+
+          if ((responseText) && ("ERROR" in responseText)) {
+            show_message(responseText["ERROR"]["message"], "msg_error", true);
+          } else {
+            // show the error message in a popup window
+            show_message("Error {0}: {1}".format(statuscode, error), "msg_error", true);
+          }
         };
 
         // when completed, call another loop for the worker
