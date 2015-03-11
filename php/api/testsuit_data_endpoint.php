@@ -28,6 +28,7 @@ $result["icinga_status"] = Array(
 );
 $result["status"] = Array();
 $result["status"]["service_status"] = Array();
+$result["status"]["host_status"] = Array();
 foreach ($data as $value) {
 	$element = Array(
 		"host_name" => $value["host"],
@@ -38,7 +39,7 @@ foreach ($data as $value) {
 		"is_flapping" => false, #FIXME
 		"status_information" => "Dummy service output",
 	);
-	array_push($result["status"]["service_status"], $element);
+	array_push($result["status"][$value["type"] . "_status"], $element);
 }
 
 print json_encode($result);

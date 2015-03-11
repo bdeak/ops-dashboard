@@ -48,7 +48,7 @@ $(function() {
 			priority_hidden: priority_hidden,
 			priority: object["priority"],
 			service_hidden: service_hidden,
-			service: object['service'].replace(/^Systemcheck/, "SC:"),
+			service: ("service" in object ? object['service'].replace(/^Systemcheck/, "SC:") : null),
 			host: object["host"],
 			alert_active_hidden: alert_active_hidden,
 			is_flapping_hidden: is_flapping_hidden,
