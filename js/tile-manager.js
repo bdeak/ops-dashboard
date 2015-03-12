@@ -46,6 +46,7 @@ var TileManager = Backbone.View.extend(
 
         queue_tick_time: 300,
         timeout_base: 100,
+        debug: false,
 
     },
     
@@ -69,9 +70,7 @@ var TileManager = Backbone.View.extend(
 
         this.queue_position = 0;
 
-        // enable some excess logging to console.log
-        this.debug = false;
-
+        this.debug = this.options.debug;
 
     },
 

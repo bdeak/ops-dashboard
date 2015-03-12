@@ -20,6 +20,7 @@ $exposable_configuration_keys = Array(
 	"effects",
 	"user_msg",
 	"show_outdated",
+	"debug",
 	);
 
 function expose_configuration () {

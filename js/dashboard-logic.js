@@ -1,5 +1,59 @@
 $(function() {
 
+    // templates to be used when creating tiles and messages
+    $.templates = {};
+    $.templates.tiles = '<div id="{id}" class="tile-frame"> \
+                              <!-- index: {index}, left: {left}, top: {top} --> \
+                              <div class="alert alert-{state} tile"> \
+                                <div class="priority {priority_hidden}">{priority}</div> \
+                              <div class="service {service_hidden}">{service}</div> \
+                            <div class="host">{host}</div> \
+                            <div class="tag_holder"> \
+                              <span class="dashtag alert_active blink {alert_active_hidden}">alert active</span> \
+                              <span class="dashtag is_flapping {is_flapping_hidden}">flapping</span> \
+                              <span class="dashtag is_soft {is_soft_hidden}">SOFT</span> \
+                              <span class="dashtag">{duration}</span> \
+                            </div> \
+                          </div> \
+                        </div>\n';
+
+    $.templates.messages = {        
+        msg_big: { container_template: {}, container: {} }, 
+        msg_loading: { container_template: {}, container: {} },
+        msg_error: { container_template: {}, container: {} },
+    };
+
+    $.templates.messages.msg_big.template = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
+    $.templates.messages.msg_big.container = "#msg_container_main";
+
+    $.templates.messages.msg_loading.template = '<div id="{message_id}" class="spinner"> \
+                                                <div class="rect1"></div> \
+                                                <div class="rect2"></div> \
+                                                <div class="rect3"></div> \
+                                                <div class="rect4"></div> \
+                                                <div class="rect5"></div> \
+                                              </div>';
+    $.templates.messages.msg_loading.container = "#msg_container_main";      
+
+    $.templates.messages.msg_error.template = '<div id="{message_id}" class="modal-content msg_error"> \
+                                            <div class="modal-header"> \
+                                                <div class="bootstrap-dialog-header"> \
+                                                <!-- \
+                                                    <div class="bootstrap-dialog-close-button" style="display: none;"> \
+                                                        <button class="close">×</button> \
+                                                    </div> \
+                                                --> \
+                                                    <div class="bootstrap-dialog-title">{title}</div> \
+                                                </div> \
+                                            </div> \
+                                            <div class="modal-body"> \
+                                                <div class="bootstrap-dialog-body"> \
+                                                    <div class="bootstrap-dialog-message">{message}</div> \
+                                                </div> \
+                                            </div> \
+                                        </div>';
+    $.templates.messages.msg_error.container = "#msg_container_main";
+
     function makeMessage(object, id, index, left, top) {
         var state;
 
@@ -16,22 +70,6 @@ $(function() {
           state = "info";
         }
 
-        // template for the message
-        var msg_template = '<div id="{id}" class="tile-frame"> \
-        						<!-- index: {index}, left: {left}, top: {top} --> \
-        						<div class="alert alert-{state} tile"> \
-        							<div class="priority {priority_hidden}">{priority}</div> \
-    								<div class="service {service_hidden}">{service}</div> \
-									<div class="host">{host}</div> \
-									<div class="tag_holder"> \
-										<span class="dashtag alert_active blink {alert_active_hidden}">alert active</span> \
-										<span class="dashtag is_flapping {is_flapping_hidden}">flapping</span> \
-										<span class="dashtag is_soft {is_soft_hidden}">SOFT</span> \
-										<span class="dashtag">{duration}</span> \
-									</div> \
-								</div> \
-							</div>\n';
-
 		var priority_hidden = (object['priority'] == 0 ? "hidden" : "");
 		var alert_active_hidden = (object['alert_active'] == 0 ? "hidden" : "");
 		var is_flapping_hidden = (object['is_flapping'] == 0 ? "hidden" : "");
@@ -39,7 +77,7 @@ $(function() {
 		var service_hidden = (object['type'] == "service" ? "" : "hidden");
 
 		// fill the template with values
-		var msg = msg_template.format_by_name({
+		var msg = $.templates.tiles.format_by_name({
 			id: id,
 			index: index,
 			left: left,
@@ -123,6 +161,8 @@ $(function() {
     // * msg_error - error message with header and different layout
     function show_message(message, type, do_show, title) {
 
+      message = message || "";
+
       function message_displayed(id) {
         var selector_id = $("#"+ id);
         if (selector_id.length > 0) {
@@ -134,46 +174,7 @@ $(function() {
           return false;
         }
       }
-
-      // JS doesn't have autovivification
-      var type_lookup = { 
-        msg_big: { container_template: {}, container: {} }, 
-        msg_loading: { container_template: {}, container: {} },
-        msg_error: { container_template: {}, container: {} },
-      };
-
-      type_lookup["msg_big"]["template"] = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
-      type_lookup["msg_big"]["container"] = "#msg_container_main";
-
-      type_lookup["msg_loading"]["template"] = '<div id="{message_id}" class="spinner"> \
-                                                  <div class="rect1"></div> \
-                                                  <div class="rect2"></div> \
-                                                  <div class="rect3"></div> \
-                                                  <div class="rect4"></div> \
-                                                  <div class="rect5"></div> \
-                                                </div>';
-      type_lookup["msg_loading"]["container"] = "#msg_container_main";      
-
-      type_lookup["msg_error"]["template"] = '<div id="{message_id}" class="modal-content msg_error"> \
-                                              <div class="modal-header"> \
-                                                  <div class="bootstrap-dialog-header"> \
-                                                  <!-- \
-                                                      <div class="bootstrap-dialog-close-button" style="display: none;"> \
-                                                          <button class="close">×</button> \
-                                                      </div> \
-                                                  --> \
-                                                      <div class="bootstrap-dialog-title">{title}</div> \
-                                                  </div> \
-                                              </div> \
-                                              <div class="modal-body"> \
-                                                  <div class="bootstrap-dialog-body"> \
-                                                      <div class="bootstrap-dialog-message">{message}</div> \
-                                                  </div> \
-                                              </div> \
-                                          </div>';
-      type_lookup["msg_error"]["container"] = "#msg_container_main";
-      
-      message = message || "";
+   
       var message_md5 = $.md5(message + type);
       var message_id_template = "message_{md5}";
       var message_id = message_id_template.format_by_name({md5: message_md5});
@@ -201,7 +202,7 @@ $(function() {
         if (($.message_shown.type !== null) && ($.message_shown.md5 != message_md5)) {
           console.debug("deleting message with type {0}, id {1}".format($.message_shown.type, message_id_template.format_by_name({md5: $.message_shown.md5})));
           var element = {
-              container: "{0} #{1}".format(type_lookup[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})),
+              container: "{0} #{1}".format($.templates.messages[$.message_shown.type]["container"], message_id_template.format_by_name({md5: $.message_shown.md5})),
           }
           $.frame_manager.queue_add("hide_msg", element);
         }
@@ -209,8 +210,8 @@ $(function() {
           console.debug("showing message '{0}' with type '{1}', id '{2}'".format(message, type, message_md5));
           // show the error message
           var element = {
-            container: type_lookup[type]["container"],
-            content: type_lookup[type]["template"].format_by_name({message: message, title: title, message_id: message_id}),
+            container: $.templates.messages[type]["container"],
+            content: $.templates.messages[type]["template"].format_by_name({message: message, title: title, message_id: message_id}),
           }
           $.frame_manager.queue_add("show_msg", element);
           $.message_shown.type = type;
@@ -221,13 +222,27 @@ $(function() {
         console.debug("Hide message was requested for message {0}, type {1}".format(message, type));
           // hide the error message
           var element = {
-              container: "{0} #{1}".format(type_lookup[type]["container"], message_id), // fixme: initially this may be null
+              container: "{0} #{1}".format($.templates.messages[type]["container"], message_id), // fixme: initially this may be null
           }
           $.frame_manager.queue_add("hide_msg", element);
           $.message_shown.type = null;
           $.message_shown.md5 = null;
         }
       }
+    };
+
+    // show a message without using the tile manager
+    // only to be used initially to show the loading animation
+    function show_message_immediate(message, type, do_show, title) {
+      message = message || "";
+      var message_md5 = $.md5(message + type);
+      var message_id_template = "message_{md5}";
+      var message_id = message_id_template.format_by_name({md5: message_md5});
+      var container = $.templates.messages[type]["container"];
+      var content = $.templates.messages[type]["template"].format_by_name({message: message, title: title, message_id: message_id});
+      $(container).append(content).hide().fadeIn($.queue_tick_time * 2);
+      $.message_shown.type = type;
+      $.message_shown.md5 = message_md5;
     };
 
     function delete_all_messages() {
@@ -588,6 +603,7 @@ $(function() {
         },
         queue_tick_time: $.queue_tick_time,
         timeout_base: $.timeout_base,
+        debug: $.config["debug"]["frontend"]["tile_manager"],
       });
 
       // trigger the queue_next event once
@@ -1247,6 +1263,8 @@ $(function() {
         successAction = function(data, status, xhr) {
           $.config = data;
 
+          $.debug = $.config["debug"]["frontend"]["main"] || false;
+
           // draw the grid/initialize $.frame_manager, now with default values
           draw_grid();
           draw_grid_infobar();
@@ -1259,10 +1277,6 @@ $(function() {
             $(".main-title").html($.config["dashboard_name_major"]);
           }
         
-          // show the initial loading message
-          //show_message("Fetching data from the icinga server...", "msg_info", true);
-          show_message(null, "msg_loading", true);
-
           // start the oncall timer, or remove the tag for it if it's disabled
           if ($.config["oncall_lookup_enabled"] || $.config["aod_lookup_enabled"]) {
             show_personnel();
@@ -1287,6 +1301,10 @@ $(function() {
           }
 
         };
+
+        // show the initial loading message
+        show_message_immediate(null, "msg_loading", true);
+
         // do the ajax call
         ajaxCall($.getconfig_url, 'GET', null, successAction);
     };
@@ -1300,14 +1318,13 @@ $(function() {
     $.lastok_url = "{0}/php/api/get_last_state.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
     $.user_msg_url = "{0}/php/api/get_messages.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
 
-    $.debug = false;
-
     // base timeout values, will be overridden in detect_display_options() 
     $.timeout_base = 100;
     $.queue_tick_time = $.timeout_base * 3;
 
     $.queue_tick_time_infobar = 300;
     $.timeout_base_infobar = 100;
+    $.message_shown = { type: null, md5: null };
 
     // get the display configuration from the configuration file
     init();
@@ -1315,7 +1332,6 @@ $(function() {
     // start fetching the data
     $.monitor_data = null;
     $.metadata = null;
-    $.message_shown = { type: null, md5: null };
     get_monitor_data();
 
     // show the time, set periodical call
