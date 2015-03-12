@@ -173,7 +173,7 @@ var TileManager = Backbone.View.extend(
               }
               catch(err) {
                   console.warn("{1} - Failed to delete element, most likely it was deleted already (?): {0}".format(err, this.el));
-                  this.start_queue_processing();
+                  this.queue_next();
               }
               // if animate is not required, call queue_next immediately
               if (animate === false) {
