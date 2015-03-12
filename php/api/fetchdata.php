@@ -159,21 +159,11 @@ if (! function_exists($sort_method_func)) {
 	handle_error(sprintf("Function '%s' doesn't exist for sorting method '%s'!", $sort_method_func, $config["sort_method"]));
 }
 
-## sort the source array
-#$l->debug("before");
-#$statuses_sort = $statuses["status"];
-#$metadata = $statuses["metadata"];
-##$l->debug(print_r($statuses, true));
-##$statuses = $statuses["status"];
 if (!isset($statuses["status"])) {
 	$statuses["status"] = Array();	
 }
+
 uasort($statuses["status"], $sort_method_func);
-#$l->debug("after");
-##$l->debug(print_r($statuses, true));
-#
-#$statuses["status"] = $statuses_sort;
-#$statuses["metadata"] = $metadata;
 
 # go through the array and fill the index values
 $index = 1;
@@ -182,39 +172,29 @@ foreach ($statuses["status"] as $md5 => $subhash) {
 	$index++;
 }
 
-
 if ($config["show_last_ok"]) {
 	if (!file_exists($config["dashboard_db"])) {
 		initialize_dashboard_db($config["dashboard_db"]);
 	}
 	# get the last status from the sqlite database
 	$last_state = get_last_state();
-	if (!array_key_exists("state", $last_state)) {
-		# first run, initialize with the current state
-		if (!(array_key_exists("status", $statuses) || (array_key_exists("status", $statuses) && count($statuses["status"]) == 0))) {
-			write_last_status("OK");
-		} else {
-			write_last_status("PROBLEM");
-		}
+	if (count($statuses["status"]) == 0) {
+		write_last_status("OK");
 	} else {
 		# there is an old state, and a new state also
 		$host_count = 0;
 		$warn_count = 0;
 		$crit_count = 0;
-		if (!(array_key_exists("status", $statuses) || (array_key_exists("status", $statuses) && count($statuses["status"]) == 0))) {			
-			$current_state = "OK";
-		} else {
-			$current_state = "PROBLEM";
-			foreach ($statuses["status"] as $key => $value) {
-				if ($statuses["status"][$key]['type'] == "host") {
-					$host_count++;
-				}
-				if ($statuses["status"][$key]['type'] == "service") {
-					if ($statuses["status"][$key]['status'] == "CRITICAL") {
-						$crit_count++;
-					} elseif ($statuses["status"][$key]['status'] == "WARNING") {
-						$warn_count++;
-					}
+		$current_state = "PROBLEM";
+		foreach ($statuses["status"] as $key => $value) {
+			if ($statuses["status"][$key]['type'] == "host") {
+				$host_count++;
+			}
+			if ($statuses["status"][$key]['type'] == "service") {
+				if ($statuses["status"][$key]['status'] == "CRITICAL") {
+					$crit_count++;
+				} elseif ($statuses["status"][$key]['status'] == "WARNING") {
+					$warn_count++;
 				}
 			}
 		}
