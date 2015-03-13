@@ -13,19 +13,12 @@ $config["page_title"] = "Icinga Dashboard";
 $config["dashboard_name_major"] = "Operations Team";
 $config["dashboard_name_minor"] = "dashboard";
 #################################################################
-# datasource urls
-# SERVICES
-# only hard states
-#$config["service_status_url"] = "http://example.com/cgi-bin/icinga/status.cgi?hoststatustypes=3&serviceprops=2359306&servicestatustypes=20&jsonoutput";
-# soft and hard states
-$config["service_status_url"] = "http://example.com/cgi-bin/icinga/status.cgi?hoststatustypes=3&serviceprops=2097162&servicestatustypes=20&jsonoutput";
-# all problems
-#$config["service_status_url"] = "http://example.com/cgi-bin/icinga/status.cgi?servicestatustypes=28&jsonoutput";
-# HOSTS
-$config["host_status_url"] = "http://example.com/cgi-bin/icinga/status.cgi?style=hostdetail&hostprops=2359306&hoststatustypes=12&jsonoutput";
-# HOST and SERVICEGROUPS - needed for priority lookup
-$config["servicegroup_url"] = "http://example.com/cgi-bin/icinga/config.cgi?type=servicegroups&jsonoutput";
-$config["hostgroup_url"] = "http://example.com/cgi-bin/icinga/config.cgi?type=hostgroups&jsonoutput";
+$config["status"]["backend_type"] = "icinga";
+$config["status"]["icinga"]["status_url"]["service"] = "http://example.com/cgi-bin/icinga/status.cgi?hoststatustypes=3&serviceprops=2097162&servicestatustypes=20&jsonoutput";
+$config["status"]["icinga"]["status_url"]["host"] = "http://example.com/cgi-bin/icinga/status.cgi?style=hostdetail&hostprops=2359306&hoststatustypes=12&jsonoutput";
+# Don't forget to set these if the icinga interface is password protected!
+#$config["status"]["icinga"]["username"] = "icinga_password";
+#$config["status"]["icinga"]["password"] = "XXX";
 #################################################################
 # cache settings
 $config["cache_ttl_priorities"] = 60 * 60;
@@ -34,10 +27,6 @@ $config["cache_ttl_oncall"] = 60 * 60;
 $config["cache_ttl_usermsg"] = 60;
 $config["timeout"] = 120;
 $config["sqlite_timeout"] = 10;
-#################################################################
-# fixme: replace these
-$config["icinga_username"] = "icinga_password";
-$config["icinga_password"] = "XXX";
 #################################################################
 # location of the dashboard.db sqlite database - for storing internal data
 $config["dashboard_db"] = $config["base_dir"] . "/db/dashboard.db";
@@ -70,14 +59,41 @@ $config["sort_priority_asc"] = false;
 # should alert lookups be enabled?
 # alert lookup is to be used to show as a tag that a given alert has been received by the Operations Center
 # this varies in every setup, so is disabled by default, as no generic lookup method can be written
-$config["alert_lookup_enabled"] = true;
+$config["alert_lookup_enabled"] = false;
 # a dummy lookup method that does nothing
-$config["alert_lookup_method"] = "dummy";
+#$config["alert_lookup_method"] = "dummy";
 #################################################################
 # should priorities looked up and shown?
-$config["priority_lookup_enabled"] = true;
-# available: icinga_group_membership - based on icinga service- and hostgroup membership (priority1-priority5)
-$config["priority_lookup_method"] = "icinga_group_membership";
+$config["priority_lookup"]["enabled"] = false;
+# available:  * icinga_group_membership - based on icinga service- and hostgroup membership (priority1-priority5)
+# 			  * namebased - based on any field present in status data
+#			  * testsuit - get data from the testsuit
+#$config["priority_lookup"]["method"] = "icinga_group_membership";
+#$config["priority_lookup"]["data_url"]["service"] = "http://example.com/cgi-bin/icinga/config.cgi?type=servicegroups&jsonoutput";
+#$config["priority_lookup"]["data_url"]["host"] = "http://example.com/cgi-bin/icinga/config.cgi?type=hostgroups&jsonoutput";
+# Array of hashes, each hash is defined as:
+# pattern => regex to match for
+# replacement => replacement expression to use, defaults to '$1'
+# field => in which field to search for (in the output of fetchdata.php), only used in namebased
+# if multiple hashes provided, the first that is matched will be used
+#$config["priority_lookup"]["patterns"] = Array(Array("pattern" => "/^Priority(\d)\s*/i"));
+
+#$config["priority_lookup"]["method"] = "namebased";
+#$config["priority_lookup"]["patterns"] = Array(
+#	Array(
+#		"field" => "service",
+#		"pattern" => "/^PRI:\s*(\d)\s*/i",
+#	),
+#	Array(
+#		"field" => "host",
+#		"pattern" => "/^PRI:\s*(\d)\s*/i",
+#	)
+#);
+# if the priority is derived from the status data, should the data be removed 
+# after the priority identification has been made? (so that the priority is not shown twice)
+# (has to be implemented for each priority lookup method separately)
+#$config["priority_lookup"]["cleanup_state_data"] = true;
+#$config["priority_lookup"]["method"] = "testsuit";
 #################################################################
 # log the state changes and show the time since in error, or how long in ok?
 $config["show_last_ok"] = true;
@@ -150,17 +166,20 @@ $config["effects"]["infobar"]["del"]["options"]["direction"] = "down";
 $config["user_msg"]["enabled"] = true;
 $config["user_msg"]["lookup_method"] = "sqlite";
 # default msg ttl in seconds
-$config["user_msg"]["default_ttl"] = 5 * 60;
+$config["user_msg"]["default_ttl"] = 60 * 60;
 # if multiple user messages are to be shown, after how many seconds should they change
-$config["user_msg"]["change_time"] = 30;
+$config["user_msg"]["change_time"] = 60;
 #############################################################################################################
-# show if the frontend failed to perform an update of the interface? (using recoloring the background)
-$config["show_outdated"]["frontend"]["enabled"] = true;
+# show error if the data was not updated for a certain time?
+$config["show_outdated"]["data"]["enabled"] = true;
 # how many seconds to allow before showing the alert?
-$config["show_outdated"]["frontend"]["max_time"] = 2 * 60;
+$config["show_outdated"]["data"]["max_time"] = 2 * 60;
 # show if the icinga output has not refreshed recently? (based on status_data_age in JSON output)
 # status_update_interval: 10
 $config["show_outdated"]["icinga"]["enabled"] = true;
 # how many times of "status_update_interval" (also from JSON output) to allow before reporting 
 # an outdated status?
 $config["show_outdated"]["icinga"]["threshold"] = 5;
+#############################################################################################################
+$config["debug"]["frontend"]["main"] = false;
+$config["debug"]["frontend"]["tile_manager"] = false;

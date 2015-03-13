@@ -248,7 +248,9 @@ $(function() {
     function delete_all_messages() {
       if ($("#msg_container_main").children().length) {
         console.debug("Deleting all messages");
-        $("#msg_container_main").fadeOut().empty();
+        $("#msg_container_main").fadeOut($.queue_tick_time * 2, function() {
+            this.empty();
+        });
       }
     };
 

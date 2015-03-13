@@ -198,22 +198,15 @@ var TileManager = Backbone.View.extend(
               // just show the message
               this.show_message(element.container, element.content, animate, postfunc);
               // queue a dummy element to allow longer animation times
-              this.queue_add("dummy", {}, true);
+              //this.queue_add("dummy", {}, true);
               this.start_queue_processing();
           } else if (type == "hide_msg") {
               // hide a message
               var postfunc = element.postfunc || [];
               this.hide_message(element.container, postfunc);
               // queue a dummy element to allow longer animation times
-              this.queue_add("dummy", {}, true);           
+              //this.queue_add("dummy", {}, true);           
               this.start_queue_processing();     
-          } else if (type == "update_msg") {
-              // update a message
-              var animate = false;
-              if (_.isBoolean(element.animate)) {
-                animate = element.animate;
-              }
-              this.update_message(element.container, element.classes, element.content, animate);
           } else if (type == "adjust_size") {
               // change the size of the grid, adjust the side margins and tile text also
               this.adjust_size(element);
