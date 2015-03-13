@@ -144,8 +144,8 @@ if ($priorities !== null) {
 if ($alert_history !== null) {
 	foreach ($alert_history as $type => $value) {
 		foreach ($alert_history[$type] as $key => $value) {
-			if (array_key_exists($statuses["status"][md5($key)])) {
-				$statuses["status"][md5($key)]["priority"] = $value;
+			if (array_key_exists(md5($key), $statuses["status"])) {
+				$statuses["status"][md5($key)]["alert_active"] = ($value == 1 ? true : false);
 			}
 		}
 	}

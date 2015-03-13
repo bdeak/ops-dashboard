@@ -99,8 +99,8 @@ $(function() {
                     } catch (err) {
                         service_displayed = "N/A";
                     }
-                    $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state, type: obj.type});
-                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, obj.host, obj.state, obj.priority, obj.type));
+                    $.alert_data.push({priority: obj.priority, service: obj.service, host: obj.host, state: obj.state, type: obj.type, alerting: obj.alerting});
+                    $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, obj.host, obj.state, obj.priority, obj.type, obj.alerting));
                 });
 
                 init_typeahead("service");
@@ -128,8 +128,8 @@ $(function() {
         return false;
     }
 
-    function build_row_content(index, service, host, state, priority, type) {
-        return "<tr id='row-{0}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5} {6}</td></tr>"
+    function build_row_content(index, service, host, state, priority, type, alerting) {
+        return "<tr id='row-{0}' class='valid-data'><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6} {7}</td></tr>"
                 .format(
                     index,
                     priority,
@@ -137,6 +137,7 @@ $(function() {
                     host,
                     state,
                     type,
+                    (alerting == 1 ? "y" : "n"),
                     '<button type="button" class="close">x</button>'
                 );
     }
@@ -199,6 +200,7 @@ $(function() {
         var host_pattern = $("#data_host").val();
         var state = $("#data_state").val();
         var num_to_add = $("#data_number_to_add").val();
+        var alerting = ($("#data_alerting").val() == "alerting" ? 1 : 0);
         var num_services;
         var num_hosts;
 
@@ -250,8 +252,8 @@ $(function() {
                 if (check_alert_stored(host, service) === false) {
                         var type = (service.length > 0 ? "service" : "host");
                         var service_displayed = (service.length > 0 ? service : "N/A");
-                        $.alert_data.push({priority: priority, service: service, host: host, state: state, type: type});
-                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, host, state, priority, type));
+                        $.alert_data.push({priority: priority, service: service, host: host, state: state, type: type, alerting: alerting,});
+                        $("#data_holder").append(build_row_content($.assocArraySize($.alert_data), service_displayed, host, state, priority, type, alerting));
                         init_typeahead("service");
                         init_typeahead("host");
                         //init_typeahead("state");

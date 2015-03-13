@@ -30,7 +30,7 @@ function initialize_dashboard_db ($path_to_db) {
 	$query_usertext = sprintf("CREATE TABLE usertext(id integer primary key, message text, timestamp integer, ttl integer)");
 	$query_last_ok = sprintf("CREATE TABLE status_history(id integer primary key, state text, host_count integer, crit_count integer, warn_count integer, timestamp integer)");
 	$query_user_msg = sprintf("CREATE TABLE user_msg(id integer primary key, message text, sender text, valid_until integer, timestamp integer)");
-	$query_testsuit = sprintf("CREATE TABLE testsuit(id integer primary key, priority integer, service text, host text, state text, type text)");
+	$query_testsuit = sprintf("CREATE TABLE testsuit(id integer primary key, priority integer, service text, host text, state text, type text, alerting integer)");
 
 	try {
 		$sqlite->exec($query_personnel);

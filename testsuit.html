@@ -50,6 +50,10 @@
                     <option value="4">4</option>
                     <option value="5">5</option>
                 </select>
+                <select id="data_alerting" class="selectpicker form-control" style="padding-top: 10px;" data-width="auto">
+                    <option value="not_alerting" selected>No Alert</option>
+                    <option value="alerting">Alerting</option>
+                </select>
                 <input id="data_number_to_add" type="text" class="form-control" placeholder="Number of tiles" value="10" name="data_number_to_add" data-toggle="tooltip" title="Number of tiles to add" style="width: 4em; text-align: right;">                
                 <button type="button" id="add-data" class="btn btn-primary">Add new entries</button>
             </form>
@@ -68,6 +72,7 @@
                     <th>Host</th>
                     <th>State</th>
                     <th>Type</th>
+                    <th>Alerting</th>
                 </tr>
             </table>
         </div>

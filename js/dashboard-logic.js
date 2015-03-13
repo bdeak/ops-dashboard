@@ -71,9 +71,9 @@ $(function() {
         }
 
 		var priority_hidden = (object['priority'] == 0 ? "hidden" : "");
-		var alert_active_hidden = (object['alert_active'] == 0 ? "hidden" : "");
-		var is_flapping_hidden = (object['is_flapping'] == 0 ? "hidden" : "");
-		var is_soft_hidden = (object['is_soft'] == 0 ? "hidden" : "");
+		var alert_active_hidden = (object['alert_active'] === true ? "" : "hidden");
+		var is_flapping_hidden = (object['is_flapping'] === true ? "" : "hidden");
+		var is_soft_hidden = (object['is_soft'] === true ? "" : "hidden");
 		var service_hidden = (object['type'] == "service" ? "" : "hidden");
 
 		// fill the template with values
