@@ -923,21 +923,90 @@ $(function() {
       // get the lastok state
       function show_lastok() {
         if ($.config['show_last_ok'] === true) {
+
+          $.lastok_second = $.lastok_second || null;
+          $.lastok_currstate = $.lastok_currstate || null;
+
           successAction = function(data, status, xhr) {
-            if ($('#lastok-container').hasClass("hidden")) {
-              $('#lastok-container').removeClass("hidden");
+
+            // analyze the value
+            if (parseInt(data["duration_sec"]) < 60 * 60) {
+              $.lastok_second = parseInt(data["duration_sec"]);
+              $.lastok_currstate = data["currstate"];
+              // need to increment on a per second basis
+              $.myTimeout("increment_lastok_second", increment_lastok_second, 1000);
+            } else {
+              // set the value normally
+              $.lastok_second = null;
+              $.lastok_currstate = null;
+              $('#lastok').html(convert_seconds_to_duration(parseInt(data["duration_sec"])));
+              // change the icon if needed
+              if (!$('#lastok-container .glyphicon').hasClass($.config["icon"]["lastok"][data["currstate"]])) {
+                // remove all classes and add the needed ones back
+                $('#lastok-container .glyphicon').removeClass().addClass("glyphicon topicon {0}".format($.config["icon"]["lastok"][data["currstate"]]));
+              }
+              $('#lastok-container .glyphicon').unbind();
+
+              // unhide the tag if needed
+              if ($('#lastok-container').hasClass("hidden")) {
+                $('#lastok-container').removeClass("hidden");
+              }
+              $('#lastok-container').unbind();
             }
-            // change the icon if needed
-            if (!$('#lastok-container .glyphicon').hasClass($.config["icon"]["lastok"][data["currstate"]])) {
-              // remove all classes and add the needed ones back
-              $('#lastok-container .glyphicon').removeClass().addClass("glyphicon topicon {0}".format($.config["icon"]["lastok"][data["currstate"]]));
-            }
-            // set the value  
-            $('#lastok').html(data["duration_human"]);
           }
-          // do the ajax call
           ajaxCall($.lastok_url, 'GET', null, successAction);
         }
+      };
+
+      // when the last ok state change has happened less than a minute ago,
+      // increment the display until it reaches the minute range
+      function increment_lastok_second() {
+        if ($.lastok_second !== null) {
+
+          $('#lastok').html(convert_seconds_to_duration($.lastok_second));
+          if ($('#lastok-container').hasClass("hidden")) {
+            $('#lastok-container').removeClass("hidden");
+          }
+          // change the icon if needed
+          if (!$('#lastok-container .glyphicon').hasClass($.config["icon"]["lastok"][$.lastok_currstate])) {
+            // remove all classes and add the needed ones back
+            $('#lastok-container .glyphicon').removeClass().addClass("glyphicon topicon {0}".format($.config["icon"]["lastok"][$.lastok_currstate]));
+          }
+
+          $('#lastok-container').unbind();        
+          $('#lastok-container .glyphicon').unbind();
+          $('#lastok').unbind();
+
+          // reschedule if needed
+          if ($.lastok_second < 60) {
+            $.lastok_second++;
+            $.myTimeout("increment_lastok_second", increment_lastok_second, 1000);
+          } else if ($.lastok_second < 60 * 60) {
+            $.lastok_second += 5;
+            $.myTimeout("increment_lastok_second", increment_lastok_second, 5 * 1000);
+          }
+        }
+      };
+
+      function convert_seconds_to_duration (seconds) {
+        var duration;
+        if (seconds > 60 * 60 * 24 * 7) {
+          duration = seconds / (60 * 60 * 24 * 7);
+          return duration.toFixed(1) + "w";
+        }
+        if (seconds > 60 * 60 * 24) {
+          duration = seconds / (60 * 60 * 24);
+          return duration.toFixed(1) + "d";
+        }
+        if (seconds > 60 * 60) {
+          duration = seconds / (60 * 60);
+          return duration.toFixed(1) + "h";
+        }
+        if (seconds > 59) {
+          duration = seconds / 60;
+          return duration.toFixed(1) + "m";
+        }
+        return seconds + "s";
       };
 
       // check if alert on data freshness should be displayed
@@ -1201,14 +1270,16 @@ $(function() {
       }, duration, func, name);
     };
 
-    $.myKillTimeout = function (name) {
+    $.myKillTimeout = function (name, lazy) {
+      lazy = lazy || false;
       if (($.timers !== undefined) && (name in $.timers) && ($.timers[name] !== null)) {
         clearTimeout($.timers[name]);
         $.timers[name] = null;
         if ($.debug)
           console.debug("Timeout with name '{0}' has been killed".format(name));
       } else {
-        console.warn("Can't kill timeout with name '{0}': timer not found".format(name));
+        if (lazy !== true)
+          console.warn("Can't kill timeout with name '{0}': timer not found".format(name));
       }
     }
 
@@ -1244,7 +1315,7 @@ $(function() {
           // start timer for lastok display
           if ($.config['show_last_ok'] === true) {
             show_lastok();
-            var timer_lastok = setInterval(function() { show_lastok(); }, 1000 * 60); // every minute
+            //var timer_lastok = setInterval(function() { show_lastok(); }, 1000 * 60); // every minute
           }
 
           // start usermsg feching, if needed

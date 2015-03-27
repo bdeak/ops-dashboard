@@ -179,7 +179,9 @@ if ($config["show_last_ok"]) {
 	# get the last status from the sqlite database
 	$last_state = get_last_state();
 	if (count($statuses["status"]) == 0) {
-		write_last_status("OK");
+		if ($last_state["state"] != "OK") { 
+			write_last_status("OK"); 
+		}
 	} else {
 		# there is an old state, and a new state also
 		$host_count = 0;
@@ -198,6 +200,7 @@ if ($config["show_last_ok"]) {
 				}
 			}
 		}
+		$l->debug($current_state . " vs " . $last_state["state"]);
 		if ($current_state != $last_state["state"]) {
 				write_last_status($current_state, $host_count, $crit_count, $warn_count);
 				$l->info("Writing updated state: " . $current_state);

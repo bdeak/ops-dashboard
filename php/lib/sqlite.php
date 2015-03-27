@@ -74,7 +74,7 @@ function get_last_state() {
 	$sqlite = get_sqlite_conn($config["dashboard_db"], $config["sqlite_timeout"]);
 
 	# get the personnel, and return it as a string
-	$query = "SELECT state,timestamp from status_history ORDER BY timestamp DESC LIMIT 1";
+	$query = "SELECT state,timestamp from status_history ORDER BY id DESC LIMIT 1";
 	
 	$res = $sqlite->query($query); 
 
