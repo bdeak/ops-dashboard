@@ -2,19 +2,21 @@ $(function() {
 
     // templates to be used when creating tiles and messages
     $.templates = {};
-    $.templates.tiles = '<div id="{id}" class="tile-frame"> \
-                              <!-- index: {index}, left: {left}, top: {top} --> \
-                              <div class="alert alert-{state} tile"> \
-                                <div class="priority {priority_hidden}">{priority}</div> \
-                              <div class="service {service_hidden}">{service}</div> \
-                            <div class="host">{host}</div> \
-                            <div class="tag_holder"> \
-                              <span class="dashtag alert_active blink {alert_active_hidden}">alert active</span> \
-                              <span class="dashtag is_flapping {is_flapping_hidden}">flapping</span> \
-                              <span class="dashtag is_soft {is_soft_hidden}">SOFT</span> \
-                              <span class="dashtag">{duration}</span> \
-                            </div> \
-                          </div> \
+    $.templates.tiles = '<div id="{id}" class="tile-frame">\n\
+                          <!-- index: {index}, left: {left}, top: {top} -->\n\
+                          <div class="alert alert-{state} tile">\n\
+                            <div class="priority">{priority}</div>\n\
+                            <div class="tile-rest">\n\
+                              <div class="service {service_hidden}">{service}</div>\n\
+                              <div class="host">{host}</div>\n\
+                              <div class="tag_holder">\n\
+                                <span class="dashtag alert_active blink {alert_active_hidden}">alert active</span>\n\
+                                <span class="dashtag is_flapping {is_flapping_hidden}">flapping</span>\n\
+                                <span class="dashtag is_soft {is_soft_hidden}">SOFT</span>\n\
+                                <span class="dashtag">{duration}</span>\n\
+                              </div>\n\
+                            </div>\n\
+                          </div>\n\
                         </div>\n';
 
     $.templates.messages = {        
@@ -23,7 +25,7 @@ $(function() {
         msg_error: { container_template: {}, container: {} },
     };
 
-    $.templates.messages.msg_big.template = '<div id="{message_id}" class="msg_big alert alert-success msg_ok">{message}</div>';
+    $.templates.messages.msg_big.template = '<div id="{message_id}" class="msg_big alert-success msg_ok">{message}</div>';
     $.templates.messages.msg_big.container = "#msg_container_main";
 
     $.templates.messages.msg_loading.template = '<div id="{message_id}" class="spinner"> \
@@ -70,7 +72,7 @@ $(function() {
           state = "info";
         }
 
-		var priority_hidden = (object['priority'] == 0 ? "hidden" : "");
+		var priority = (object['priority'] == 0 ? "" : object['priority']);
 		var alert_active_hidden = (object['alert_active'] === true ? "" : "hidden");
 		var is_flapping_hidden = (object['is_flapping'] === true ? "" : "hidden");
 		var is_soft_hidden = (object['is_soft'] === true ? "" : "hidden");
@@ -83,8 +85,7 @@ $(function() {
 			left: left,
 			top: top,
 			state: state,
-			priority_hidden: priority_hidden,
-			priority: object["priority"],
+			priority: priority,
 			service_hidden: service_hidden,
 			service: ("service" in object ? object['service'].replace(/^Systemcheck/, "SC:") : null),
 			host: object["host"],
@@ -249,7 +250,7 @@ $(function() {
       if ($("#msg_container_main").children().length) {
         console.debug("Deleting all messages");
         $("#msg_container_main").fadeOut($.queue_tick_time * 2, function() {
-            this.empty();
+            $(this).empty();
         });
       }
     };
@@ -853,75 +854,22 @@ $(function() {
       return {columns: proposed_columns, rows: proposed_rows, tile_sizex: proposed_tile_sizex, tile_sizey: proposed_tile_sizey, tiles_max: proposed_tiles_max};
     };
 
-    // update the contents of the tiles so that they match the size of the tiles
+
+    // update the font size of the tile depending on the dimensions of the tile
+    // all CSS elements within the tile are using the 'em' unit so that their sizes
+    // are only depending on the font size of the parent element, that is, '.tile-frame'
+    //
+    // note:
     // this is a workaround for the fact that CSS can't scale elements relative to their parent 
     // containers, only to font sizes or viewport sizes
-    // fixme: try using eg values in css and only alter the font size of the CSS elements?
     function update_tile_text() {
-      // define scaling factors that provide the relative sizes inside a tile
-
-      // size of the service text
-      var scale_factor_text_service = 0.22;
-      // size of the host text
-      var scale_factor_text_host = 0.18;
-      // font size of the tags
-      var scale_factor_text_tag = 0.15;
-      // space between service and host text
-      var scale_factor_margin_service_host = -0.05;
-      // offset for host name for host problems
-      var scale_factor_margin_host = 0.05;
-      // padding of the service text on the top
-      var scale_factor_padding_service_top = 0.04;
-      // padding of the service text on the right
-      var scale_factor_padding_service_right = 0.07;
-      // padding of the tag holder - horizontally
-      var scale_factor_tag_padding_horizontal = 0.05;
-      // padding of the tag holder - vertically
-      var scale_factor_tag_padding_vertical = 0.001;
-      // the radius of the tags
-      var scale_factor_tag_border_radius = 0.03;
-      // space between the tags
-      var scale_factor_tag_margin_left = 0.01;
-      // the radius of the tiles
-      var scale_factor_tile_radius = 0.05;
-      // the padding of the tag holder at the bottom
-      var scale_factor_tag_holder_bottom = 0.04;
-      // the size of the priority text
-      var scale_factor_text_priority = 1;
-      // the padding of the priority text on the top
-      var scale_factor_margin_priority_top = -0.3;
       
       // assemble an associative array with the data that will be added to the DOM in the form of a new stylesheet
       var style_data = {};
-      style_data['.service'] = {};
-      style_data['.service']['font-size'] = Math.round($.tile_sizey * scale_factor_text_service) + "px";
-      style_data['.host'] = {};
-      style_data['.host']['font-size'] = Math.round($.tile_sizey * scale_factor_text_host) + "px";
-      style_data['.host']['margin-top'] = Math.round($.tile_sizey * scale_factor_margin_service_host) + "px";
-      style_data['.alert-down .host'] = {};
-      style_data['.alert-down .host']['font-size'] = Math.round($.tile_sizey * scale_factor_text_service) + "px";
-      style_data['.alert-down .host']['margin-top'] = Math.round($.tile_sizey * scale_factor_margin_host) + "px";
-      style_data['.dashtag'] = {};
-      style_data['.dashtag']['font-size'] = Math.round($.tile_sizey * scale_factor_text_tag) + "px";
-      style_data['.dashtag']['padding'] = "{0}px {1}px {0}px {1}px".format(Math.round($.tile_sizey * scale_factor_tag_padding_vertical), Math.round($.tile_sizey * scale_factor_tag_padding_horizontal));
-      style_data['.dashtag']['border-radius'] = Math.round($.tile_sizey * scale_factor_tag_border_radius) + "px";
-      style_data['.dashtag']['-moz-border-radius'] = style_data['.dashtag']['border-radius'];
-      style_data['.dashtag']['margin-left'] = Math.round($.tile_sizey * scale_factor_tag_margin_left) + "px";
-      style_data['.alert'] = {};
-      style_data['.alert']['border-radius'] = Math.round($.tile_sizey * scale_factor_tile_radius) + "px";
-      style_data['.alert']['-moz-border-radius'] = style_data['.alert']['border-radius'];
-      style_data['.alert']['padding-top'] = Math.round($.tile_sizey * scale_factor_padding_service_top) + "px";
-      style_data['.alert']['padding-right'] = Math.round($.tile_sizey * scale_factor_padding_service_right) + "px";
-      style_data['.tag_holder'] = {};
-      style_data['.tag_holder']['right'] = style_data['.alert']['padding-right'];
-      style_data['.tag_holder']['bottom'] = Math.round($.tile_sizey * scale_factor_tag_holder_bottom) + "px";
-      style_data['.priority'] = {};
-      style_data['.priority']['font-size'] = Math.round($.tile_sizey * scale_factor_text_priority) + "px";
-      style_data['.priority']['margin-top'] = Math.round($.tile_sizey * scale_factor_margin_priority_top) + "px";
-
+      style_data['.tile-frame'] = {};
+      style_data['.tile-frame']['font-size'] = Math.round($.tile_sizey * 0.108) + "px";
       // put the custom stylesheet in place
       add_style("title_updater", style_data);
-
     }
 
     // write a custom style tag to the head, generate the content from an associative array

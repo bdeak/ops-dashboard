@@ -39,21 +39,23 @@ body, html {
 
 /* fixme: check if vw works on mobile browsers, if not, replace with JS magic */
 .page-header {
-    margin-top: 0px;
+    margin-top: 0.1vw;
     border-bottom: 1px dotted #333333;
     padding-bottom: 0px;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    font-size: 1vw;
+    font-size: 0.8vw;
     margin-bottom: 1.5vh;
 }
 
 .main-title {
+    margin-top: 0.1vw;
     font-family: 'Alegreya Sans', sans-serif;
     color: #FFFFFF;
     font-size: 3.1vw;
+    line-height: 3vw;
     margin-right: 0.2em;
     margin-left: 1.4vw;
     flex-grow: 2;
@@ -93,16 +95,8 @@ body, html {
    font-family: 'Architects Daughter', cursive;
    display: inline-table;
    font-size: 2.8vw;
+   line-height: 2.0vw;
    margin-right: 1.4vw;
-}
-
-.alert {
-  /* part of this is being overwritten from JS */ 
-  padding: 8px 3% 8px 14px;
-  border: 0;
-  margin-bottom: 0px;
-  height: 100%;  
-  text-align: right;
 }
 
 /* colors for the tiles - gradients */
@@ -191,6 +185,10 @@ body, html {
 
 }
 
+.tile-frame > div {
+    padding: 1em;
+}
+
 .tile-frame {
     z-index         : 102;
     overflow        : hidden;
@@ -198,25 +196,73 @@ body, html {
     height          : 100%;
     width           : 100%;
     opacity         : 1.0;
+    font-size       : 16px;
+}
+
+.tile-rest {
+    display: flex;
+    flex-flow: column nowrap;    
+    order: 2;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-right: -0.4em;
+}
+
+.alert {
+  /* part of this is being overwritten from JS */ 
+  padding: 8px 3% 8px 14px;
+  border: 0;
+  margin-bottom: 0px;
+  height: 100%;  
+  text-align: right;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
 }
 
 .priority {
-    float: left;
+    display: inline;
+    /*float: left;*/
     text-align: left;
     height: 100%;
+    font-size: 10em;
+    line-height: 0.67em;
+    order: 1;
+    justify-content: flex-start;
+    margin-left: 0.1em;
 }
 
 .service {
-    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    order: 1;
+    font-size: 2.15em;
+    line-height: 1.4em;
+    margin-bottom: -0.8em;
+    margin-top: -0.3em;
+}
+
+.host {
+    order: 2;
+    font-size: 1.82em;
+    line-height: 1.35em;
+    margin-bottom: 0.3em;
+}
+
+.alert-down .host {
+    order: 2;
+    font-size: 2.15em;
+    line-height: 1.35em;
+    margin-bottom: -0.3em;    
 }
 
 .tag_holder {
-    position: absolute;
-    text-align: right;
-    display: block;
+    margin-bottom: -0.3em;
+    font-size: 1.4em;
+    order: 3;
 }
 
 .alert-warn .dashtag {
@@ -232,6 +278,9 @@ body, html {
 
 .dashtag {
     display: inline-block; 
+    -moz-border-radius: 0.2em;
+    border-radius: 0.2em;
+    padding: 0 0.4em 0 0.4em;
 }
 
 .alert-unknown .dashtag {
@@ -294,7 +343,9 @@ body, html {
     border-radius: 0 0 0.5vw 0.5vw;
 }
 
-/* spinner for the loading animation */ 
+/**********************************************/
+/*                  SPINNERS                  */
+/**********************************************/
 /* http://tobiasahlin.com/spinkit/ */
 .spinner {
   font-size: 10px;
