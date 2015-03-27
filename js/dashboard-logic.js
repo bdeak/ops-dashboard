@@ -228,6 +228,14 @@ $(function() {
           $.frame_manager.queue_add("hide_msg", element);
           $.message_shown.type = null;
           $.message_shown.md5 = null;
+
+          // queue a display detection also
+          var element = {
+            func_name: detect_display_options,
+            parameters: [null, null, true],
+          }
+          $.frame_manager.queue_add("external_function", element);     
+
         }
       }
     };

@@ -24,6 +24,7 @@ body, html {
     overflow: hidden;
 }
 
+/*
 .outdated {
     background-image: none;
     background-repeat: none;
@@ -36,8 +37,13 @@ body, html {
     background: linear-gradient(to bottom, rgba(231,56,39,1) 0%, rgba(240,47,23,1) 39%, rgba(241,111,92,1) 70%, rgba(248,80,50,1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e73827', endColorstr='#f85032', GradientType=0 );
 }
+*/
 
-/* fixme: check if vw works on mobile browsers, if not, replace with JS magic */
+/**********************************************/
+/*                  Top bar                   */
+/**********************************************/
+
+
 .page-header {
     margin-top: 0.1vw;
     border-bottom: 1px dotted #333333;
@@ -98,6 +104,10 @@ body, html {
    line-height: 2.0vw;
    margin-right: 1.4vw;
 }
+
+/**********************************************/
+/*                  Tiles                     */
+/**********************************************/
 
 /* colors for the tiles - gradients */
 .alert-warn {
@@ -164,26 +174,7 @@ body, html {
     position: absolute;
 }
 
-#infobar {
-    position: absolute;
-    width:100%; 
-    bottom:0px;
-    font-size: 2.2vw;
-    font-family: 'Play', sans-serif;
-}
 
-.alert-infobar {
-    text-align: center;
-    color: #bbbbbb;
-    background-color: #030303;
-    border-top: 1px solid #444444;
-
-    /* any text that overflows should be hidden */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-}
 
 .tile-frame > div {
     padding: 1em;
@@ -239,15 +230,15 @@ body, html {
     text-overflow: ellipsis;
     white-space: nowrap;
     order: 1;
-    font-size: 2.15em;
+    font-size: 2em;
     line-height: 1.4em;
-    margin-bottom: -0.8em;
+    margin-bottom: -0.9em;
     margin-top: -0.3em;
 }
 
 .host {
     order: 2;
-    font-size: 1.82em;
+    font-size: 1.65em;
     line-height: 1.35em;
     margin-bottom: 0.3em;
 }
@@ -260,7 +251,7 @@ body, html {
 }
 
 .tag_holder {
-    margin-bottom: -0.3em;
+    margin-bottom: -0.4em;
     font-size: 1.4em;
     order: 3;
 }
@@ -278,14 +269,47 @@ body, html {
 
 .dashtag {
     display: inline-block; 
-    -moz-border-radius: 0.2em;
     border-radius: 0.2em;
+    -moz-border-radius: 0.2em;
     padding: 0 0.4em 0 0.4em;
 }
 
 .alert-unknown .dashtag {
     background-color: #D52AD5;
 }
+
+
+/**********************************************/
+/*                  Infobar                   */
+/**********************************************/
+
+
+#infobar {
+    position: absolute;
+    width:100%; 
+    bottom:0px;
+    font-size: 2.2vw;
+    font-family: 'Play', sans-serif;
+}
+
+.alert-infobar {
+    text-align: center;
+    color: #bbbbbb;
+    background-color: #030303;
+    border-top: 1px solid #444444;
+
+    /* any text that overflows should be hidden */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+}
+
+
+/**********************************************/
+/*                  Messages                  */
+/**********************************************/
+
 
 #msg_container_outer {
     position: absolute;
