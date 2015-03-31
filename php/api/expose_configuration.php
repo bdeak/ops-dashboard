@@ -14,7 +14,7 @@ $exposable_configuration_keys = Array(
 	"oncall_lookup_enabled", 
 	"alert_lookup_enabled", 
 	"priority_lookup_enabled",
-	"show_last_ok",
+	"last_ok",
 	"icon",
 	"layout",
 	"effects",

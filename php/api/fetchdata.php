@@ -37,11 +37,6 @@ $priorities = Array();
 # initialize logger
 $l = get_logger("dashboard");
 
-if ($config["cache_ttl_status"] == 0) {
-	$l->info("Clearing cache as 'cache_ttl_status' is set to 0");
-	apc_clear_cache("user");
-}
-
 # get the alert information, using the defined backend type
 $statuses = null;
 $lookup_method = $config["status"]["backend_type"];
@@ -172,7 +167,7 @@ foreach ($statuses["status"] as $md5 => $subhash) {
 	$index++;
 }
 
-if ($config["show_last_ok"]) {
+if ($config["last_ok"]["enabled"]) {
 	if (!file_exists($config["dashboard_db"])) {
 		initialize_dashboard_db($config["dashboard_db"]);
 	}

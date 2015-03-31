@@ -66,22 +66,30 @@ function write_last_status ($status, $host_count=0, $crit_count=0, $warn_count=0
 	$sqlite->close();
 }
 
-# get the last state from table status_history
-function get_last_state() {
+# get the last state from the status_history table before a given timestamp
+# $time must be either a unix timestamp or the string "now"
+function get_last_state($time = "now") {
 	global $config;
 	
 	# get the sqlite connection
 	$sqlite = get_sqlite_conn($config["dashboard_db"], $config["sqlite_timeout"]);
 
-	# get the personnel, and return it as a string
-	$query = "SELECT state,timestamp from status_history ORDER BY id DESC LIMIT 1";
+	if ($time == "now") {
+		$query = "SELECT state,timestamp from status_history ORDER BY timestamp DESC LIMIT 1";
+	} else {
+		$query = sprintf("SELECT state,timestamp from status_history WHERE timestamp < %d ORDER BY timestamp DESC LIMIT 1", $time);
+	}
 	
 	$res = $sqlite->query($query); 
 
+	$ret = Array();
+
 	while ($entry = $res->fetchArray(SQLITE3_ASSOC)) {
-		return $entry;
+		$ret = $entry;
 	}
 	$sqlite->close();
+	
+	return $ret;
 }
 
 # get the time since the last ok/problem state is happened
@@ -104,3 +112,28 @@ function get_last_state_duration() {
 	return $data;
 
 }
+
+# get the states between two points in the past
+# both $start and $end must be provided as an unix timestamp
+function get_last_state_history($start, $end) {
+	global $config, $l;
+	
+	$data = Array();
+
+	# get the sqlite connection
+	$sqlite = get_sqlite_conn($config["dashboard_db"], $config["sqlite_timeout"]);
+
+	$query = sprintf("SELECT state,timestamp from status_history WHERE timestamp > %d AND timestamp < %d ORDER BY timestamp ASC", $start, $end);
+
+	$res = $sqlite->query($query); 
+
+	while ($entry = $res->fetchArray(SQLITE3_ASSOC)) {
+		array_push($data, Array("timestamp" => (int) $entry['timestamp'], "state" => $entry["state"]));
+	}
+	$sqlite->close();
+
+	# return the current state and the time
+	return $data;
+
+}
+

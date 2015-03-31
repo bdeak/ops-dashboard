@@ -3,6 +3,12 @@
 include('log4php/Logger.php');
 require_once(dirname(__FILE__)."/../../config/config.php");
 
+# clear the cache if needed
+$l = get_logger("dashboard");
+if ($config["cache_ttl_status"] == 0) {
+	$l->info("Clearing cache as 'cache_ttl_status' is set to 0");
+	apc_clear_cache("user");
+}
 
 function get_logger($name) {
 	global $config;
