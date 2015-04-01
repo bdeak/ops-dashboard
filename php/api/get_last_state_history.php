@@ -43,7 +43,7 @@ function inflate_and_group_state_data($days, $grouping) {
 				break;
 			case 7:
 				# use calendar week (CW)
-				$history[$i]["range_name"] = "CW" + date("W", $range_start + 1);
+				$history[$i]["range_name"] = sprintf("CW%d", date("W", $range_start + 1));
 				$history[$i]["range_name_long"] = $history[$i]["range_name"];
 				break;
 			case 30:

@@ -927,22 +927,42 @@ $(function() {
 
          // fill the data structure for the chart with the data that was fetched
          successAction = function(json_data, status, xhr) {
-          $.lastok_chart_data = $.lastok_chart_data || new google.visualization.DataTable();
 
-          // add the columns, with custom roles for tooltips and coloring
-          $.lastok_chart_data.addColumn('string', "Range name");
-          $.lastok_chart_data.addColumn('number', "OK");
-          $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
-          $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
-          $.lastok_chart_data.addColumn('number', "Problem");
-          $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
-          $.lastok_chart_data.addColumn({type: 'string', role: 'style'});          
+          if ($.lastok_chart_data === undefined) {
+            console.debug("init");
+            $.lastok_chart_data = new google.visualization.DataTable();
+            // add the columns, with custom roles for tooltips and coloring
+            $.lastok_chart_data.addColumn('string', "Range name");
+            $.lastok_chart_data.addColumn('number', "OK");
+            $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+            $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+            $.lastok_chart_data.addColumn('number', "Problem");
+            $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+            $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+            $.lastok_chart_data.addRows($.assocArraySize(json_data));
+          }
 
-          $.lastok_chart_data.addRows($.assocArraySize(json_data));
+          // check if the number of rows needs to be adjusted
+          var animate = true;
+          var need_redraw = false;
+          if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
+            console.debug("changing");
+            if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
+              // need to remove rows
+              $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
+            } else {
+              // need to add more rows
+              console.debug("adding more rows");
+              $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
+            }
+            need_redraw = true;
+            animate = false;
+          }
+
           // populate the colums with data
           for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
             var i=0;
-            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["range_name"]);
+            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["range_name"] + row);
             $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["OK"]);
             $.lastok_chart_data.setValue(row, i++, "{0}: OK: {1}".format(json_data[row+1]["range_name_long"], 
                                                    json_data[row+1]["duration_human"]["OK"]));
@@ -951,16 +971,21 @@ $(function() {
             $.lastok_chart_data.setValue(row, i++, "{0}: Problem: {1}".format(json_data[row+1]["range_name_long"], 
                                                    json_data[row+1]["duration_human"]["PROBLEM"]));            
             $.lastok_chart_data.setValue(row, i++, "stroke-color: #A40000; color: #FF1414");
-
           }
 
           // finally, draw the chart
-          draw_chart();
+          if (need_redraw) {
+            hide_lastok_chart();
+          }
+          draw_chart(animate);
 
         }
 
         // draw the chart based on the already filled data
-        draw_chart = function() {
+        draw_chart = function(animate) {
+
+          animate = animate || false;
+
           if ($.lastok_chart_data !== undefined) {
 
             if ($.lastok_chart === undefined) {
@@ -977,6 +1002,7 @@ $(function() {
                            width: chart_width,
                            height: chart_height,
                            backgroundColor: 'black',
+                           animation: { duration: 0, easing: 'out', startup: false },
                            vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none' },
                            hAxis: { textPosition: 'in', textStyle: { color: 'white', bold: false, fontName: 'Arial' } },
                            isStacked: true,
@@ -984,6 +1010,10 @@ $(function() {
                            bar: { groupWidth: '90%' },
                            chartArea: { left: 0, top: 0, width: '100%', height: '90%' }, 
                          };
+
+            if (animate) {
+              chart_options.animation.duration = 1000;
+            }
 
             // draw the chart
             $.lastok_chart.draw($.lastok_chart_data, chart_options);
@@ -997,6 +1027,8 @@ $(function() {
         if ($.config['last_ok']['show_chart'] === true) {
           if (no_refresh !== true) {
             ajaxCall($.lastok_chart_url, 'GET', null, successAction);
+            // set up next round
+            $.myTimeout("lastok_chart", show_lastok_chart, 2000);
           } else {
             draw_chart();
           }
@@ -1207,7 +1239,7 @@ $(function() {
           delete_all_messages();
           
           show_lastok();
-          
+
           // add new alerts
           add_new_alerts_if_needed(data_shown);
 
@@ -1473,7 +1505,7 @@ $(function() {
     $.alive_timestamp = new Date().getTime() / 1000;
 
     $.myTimeout("worker", worker, $.queue_tick_time * 2);
-    $.myTimeout("chart", show_lastok_chart, 1000);
+    $.myTimeout("lastok_chart", show_lastok_chart, 200);
 
     // create a one-shot version of detect_display_options, to be called one time from get_monitor_data() and get_user_messages()
     $.once_detectdisplay_monitordata = _.once(detect_display_options);
