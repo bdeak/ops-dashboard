@@ -4,7 +4,7 @@ require_once (dirname(__FILE__)."/../lib/common.php");
 require_once(dirname(__FILE__)."/../../config/config.php");
 
 function inflate_and_group_state_data($days, $grouping) {
-	global $config, $l;
+	global $config, $l, $lookup;
 
 	$l->info(sprintf("Getting the state history for %d days using grouping '%s'", $days, $grouping));
 
@@ -35,6 +35,27 @@ function inflate_and_group_state_data($days, $grouping) {
 		$history[$i]["range_end"] = $range_start + $grouping * 60 * 60 * 24;
 		$history[$i]["range_start_human"] = date('jS F Y h:i:s A (T)', $history[$i]["range_start"]);
 		$history[$i]["range_end_human"] = date('jS F Y h:i:s A (T)', $history[$i]["range_end"]);
+		switch ($grouping) {
+			case 1:
+				# use short day name
+				$history[$i]["range_name"] = date("D", $range_start + 1);
+				$history[$i]["range_name_long"] = strftime("%Y.%m.%d, %A", $range_start + 1);
+				break;
+			case 7:
+				# use calendar week (CW)
+				$history[$i]["range_name"] = "CW" + date("W", $range_start + 1);
+				$history[$i]["range_name_long"] = $history[$i]["range_name"];
+				break;
+			case 30:
+				# use month name
+				$history[$i]["range_name"] = date("M", $range_start + 1);
+				$history[$i]["range_name_long"] = strftime("%Y.%m, %B", $range_start + 1);
+				break;
+			default:
+				handle_error("Undefined grouping parameter: " . $grouping);
+				break;
+
+		}
 		# set the start of the range to the end of this one for the next iteration
 		$range_start = $history[$i]["range_end"];
 		# get the current state at the beginning and the end of the range, as most likely there won't be

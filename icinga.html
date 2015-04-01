@@ -21,20 +21,27 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/underscore-1.5.2.js"></script>
     <script src="js/backbone-1.1.0.js"></script>
-    <script src="js/dashboard-logic.js"></script>
-    <script src="js/tile-manager.js"></script>
     <!-- jquery plugins -->
     <script src="js/jquery.md5.js"></script>
     <script src="js/jquery.actual.js"></script>
     <script src="js/purl.js"></script>
     <script src="js/jquery-ui.min.js"></script>
-  
+    <!-- for charting -->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load('visualization', '1.0', {'packages':['corechart']});
+    </script>
+    <script src="js/dashboard-logic.js"></script>
+    <script src="js/tile-manager.js"></script>
+
   </head>
 
   <body>
       <div class="page-header">
         <div class="main-title">Icinga <span class="subtitle">dashboard</span></div>
         <div id="spacer"></div>
+            <div id="chart-container" class="chart-container"></div>
+            <span class="container-separator"></span>            
             <div id="lastok-container" class="header-container hidden">
                 <span class="glyphicon topicon"></span>
                 <span id="lastok"></span>

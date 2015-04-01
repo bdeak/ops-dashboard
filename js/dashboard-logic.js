@@ -858,6 +858,8 @@ $(function() {
         }
         $.frame_manager_infobar.queue_add("adjust_size", element, true);
 
+        show_lastok_chart(true);
+
       }
       return {columns: proposed_columns, rows: proposed_rows, tile_sizex: proposed_tile_sizex, tile_sizey: proposed_tile_sizey, tiles_max: proposed_tiles_max};
     };
@@ -920,9 +922,93 @@ $(function() {
         ajaxCall($.personnel_url, 'GET', null, successAction);
       };
 
+
+      function show_lastok_chart(no_refresh) {
+
+         // fill the data structure for the chart with the data that was fetched
+         successAction = function(json_data, status, xhr) {
+          $.lastok_chart_data = $.lastok_chart_data || new google.visualization.DataTable();
+
+          $.lastok_chart_data.addColumn('string', "Range name");
+          $.lastok_chart_data.addColumn('number', "OK");
+          $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+          $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+          $.lastok_chart_data.addColumn('number', "Problem");
+          $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+          $.lastok_chart_data.addColumn({type: 'string', role: 'style'});          
+
+          $.lastok_chart_data.addRows($.assocArraySize(json_data));
+          for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
+            var i=0;
+            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["range_name"]);
+            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["OK"]);
+            $.lastok_chart_data.setValue(row, i++, "{0}: OK: {1}".format(json_data[row+1]["range_name_long"], 
+                                                   json_data[row+1]["duration_human"]["OK"]));
+            $.lastok_chart_data.setValue(row, i++, "fill-color: #39CD14; stroke-color: #1B8200; color: #FFFFFF");
+            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["PROBLEM"]);
+            $.lastok_chart_data.setValue(row, i++, "{0}: Problem: {1}".format(json_data[row+1]["range_name_long"], 
+                                                   json_data[row+1]["duration_human"]["PROBLEM"]));            
+            $.lastok_chart_data.setValue(row, i++, "stroke-color: #A40000; color: #FF1414");
+
+          }
+
+          draw_chart();
+
+        }
+
+        // draw the chart based on the already filled data
+        draw_chart = function() {
+          if ($.lastok_chart_data !== undefined) {
+
+            if ($.lastok_chart === undefined) {
+              $("#chart-container").hide();
+              $.lastok_chart = new google.visualization.ColumnChart($("#chart-container")[0]);
+            }
+
+            // calculate the height and width of the chart - unfortuantely google charts is not responsive
+            // 12vw
+            var chart_width = ($(window).width() / 100) * 12;
+            var chart_height = ($(window).width() / 100) * 3.5;
+
+            var chart_options = {'title':'OK/Problem state trend',
+                           width: chart_width,
+                           height: chart_height,
+                           backgroundColor: 'black',
+                           animation: { duration: 0, easing: 'out', startup: false },
+                           vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none' },
+                           hAxis: { textPosition: 'in', textStyle: { color: 'white', bold: false, fontName: 'Arial' } },
+                           isStacked: true,
+                           legend: { position: 'none' },
+                           bar: { groupWidth: '90%' },
+                           chartArea: { left: 0, top: 0, width: '100%', height: '90%' }, 
+                         };
+
+            $.lastok_chart.draw($.lastok_chart_data, chart_options);
+            //if ($('#chart-container').is(":visible") === false) {
+              $('#chart-container').show("blind", {direction: "down", easing: "easeOutCirc"}, 1000);
+            //}
+          }
+        }
+
+        no_refresh = no_refresh || false;
+
+        if ($.config['last_ok']['show_chart'] === true) {
+          if (no_refresh !== true) {
+            ajaxCall($.lastok_chart_url, 'GET', null, successAction);
+          } else {
+            draw_chart();
+          }
+        }
+
+      };
+
+      function hide_lastok_chart() {
+        $('#chart-container').hide("blind", {direction: "down", easing: "easeOutCirc"}, 200);
+      };
+
       // get the lastok state
       function show_lastok() {
-        if ($.config['show_last_ok'] === true) {
+        if ($.config['last_ok']['enabled'] === true) {
 
           $.lastok_second = $.lastok_second || null;
           $.lastok_currstate = $.lastok_currstate || null;
@@ -1313,7 +1399,7 @@ $(function() {
           }
 
           // start timer for lastok display
-          if ($.config['show_last_ok'] === true) {
+          if ($.config['last_ok']['enabled'] === true) {
             show_lastok();
             //var timer_lastok = setInterval(function() { show_lastok(); }, 1000 * 60); // every minute
           }
@@ -1345,6 +1431,7 @@ $(function() {
     $.personnel_url = "{0}/php/api/get_dashboard_data.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1"));   
     $.getconfig_url = "{0}/php/api/expose_configuration.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
     $.lastok_url = "{0}/php/api/get_last_state.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
+    $.lastok_chart_url = "{0}/php/api/get_last_state_history.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
     $.user_msg_url = "{0}/php/api/get_messages.php".format(window.location.href.replace(/^(.*)\/[^\/]*$/, "$1")); 
 
     // base timeout values, will be overridden in detect_display_options() 
@@ -1376,11 +1463,14 @@ $(function() {
     // use debounce from underscore.js to avoid bouncing effect
     // http://stackoverflow.com/a/17754746
     $( window ).resize( _.debounce(detect_display_options, 200) );
+    $( window ).resize( _.debounce(hide_lastok_chart, 100) );
+
 
     // set the initial freshness timestamp
     $.alive_timestamp = new Date().getTime() / 1000;
 
     $.myTimeout("worker", worker, $.queue_tick_time * 2);
+    $.myTimeout("chart", show_lastok_chart, 1000);
 
     // create a one-shot version of detect_display_options, to be called one time from get_monitor_data() and get_user_messages()
     $.once_detectdisplay_monitordata = _.once(detect_display_options);
