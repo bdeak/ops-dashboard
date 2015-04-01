@@ -929,6 +929,7 @@ $(function() {
          successAction = function(json_data, status, xhr) {
           $.lastok_chart_data = $.lastok_chart_data || new google.visualization.DataTable();
 
+          // add the columns, with custom roles for tooltips and coloring
           $.lastok_chart_data.addColumn('string', "Range name");
           $.lastok_chart_data.addColumn('number', "OK");
           $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
@@ -938,6 +939,7 @@ $(function() {
           $.lastok_chart_data.addColumn({type: 'string', role: 'style'});          
 
           $.lastok_chart_data.addRows($.assocArraySize(json_data));
+          // populate the colums with data
           for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
             var i=0;
             $.lastok_chart_data.setValue(row, i++, json_data[row+1]["range_name"]);
@@ -952,6 +954,7 @@ $(function() {
 
           }
 
+          // finally, draw the chart
           draw_chart();
 
         }
@@ -974,7 +977,6 @@ $(function() {
                            width: chart_width,
                            height: chart_height,
                            backgroundColor: 'black',
-                           animation: { duration: 0, easing: 'out', startup: false },
                            vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none' },
                            hAxis: { textPosition: 'in', textStyle: { color: 'white', bold: false, fontName: 'Arial' } },
                            isStacked: true,
@@ -983,10 +985,10 @@ $(function() {
                            chartArea: { left: 0, top: 0, width: '100%', height: '90%' }, 
                          };
 
+            // draw the chart
             $.lastok_chart.draw($.lastok_chart_data, chart_options);
-            //if ($('#chart-container').is(":visible") === false) {
-              $('#chart-container').show("blind", {direction: "down", easing: "easeOutCirc"}, 1000);
-            //}
+            // animate the display of the chart
+            $('#chart-container').show("blind", {direction: "down", easing: "easeOutCirc"}, 1000);
           }
         }
 
@@ -1002,6 +1004,7 @@ $(function() {
 
       };
 
+      // hide the chart, required for window resizing, as unfortunately the google charts are not responsive
       function hide_lastok_chart() {
         $('#chart-container').hide("blind", {direction: "down", easing: "easeOutCirc"}, 200);
       };
