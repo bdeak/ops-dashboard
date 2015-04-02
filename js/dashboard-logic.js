@@ -926,11 +926,10 @@ $(function() {
 
         show: {
 
+          // show the bar chart
           bar: function (no_refresh) {
-
              // fill the data structure for the chart with the data that was fetched
              successAction = function(json_data, status, xhr) {
-
               if ($.lastok_chart_data === undefined) {
                 console.debug("init");
                 $.lastok_chart_data = new google.visualization.DataTable();
@@ -944,7 +943,6 @@ $(function() {
                 $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
                 $.lastok_chart_data.addRows($.assocArraySize(json_data));
               }
-
               // check if the number of rows needs to be adjusted
               var animate = true;
               var need_redraw = false;
@@ -961,7 +959,6 @@ $(function() {
                 need_redraw = true;
                 animate = false;
               }
-
               // populate the colums with data
               for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
                 var i=0;
@@ -977,32 +974,25 @@ $(function() {
                 $.lastok_chart_data.setValue(row, i++, "stroke-color: {0}; fill-color: {1}".format($.config.last_ok.chart.bar.color.PROBLEM.outline,
                                                                                                    $.config.last_ok.chart.bar.color.PROBLEM.fill));
               }
-
               // finally, draw the chart
               if (need_redraw) {
                 hide_lastok_chart();
               }
               draw_chart(animate);
-
             }
 
             // draw the chart based on the already filled data
             draw_chart = function(animate) {
-
               animate = animate || false;
-
               if ($.lastok_chart_data !== undefined) {
-
                 if ($.lastok_chart === undefined) {
                   $("#chart-container").hide();
                   $.lastok_chart = new google.visualization.ColumnChart($("#chart-container")[0]);
                 }
-
                 // calculate the height and width of the chart - unfortuantely google charts is not responsive
                 // 12vw
                 var chart_width = ($(window).width() / 100) * 12;
                 var chart_height = ($(window).width() / 100) * 3.5;
-
                 var chart_options = {'title':'OK/Problem state trend',
                                width: chart_width,
                                height: chart_height,
@@ -1015,11 +1005,9 @@ $(function() {
                                bar: { groupWidth: '90%' },
                                chartArea: { left: 0, top: 0, width: '100%', height: '90%' },
                              };
-
                 if (animate) {
                   chart_options.animation.duration = 1000;
                 }
-
                 // draw the chart
                 $.lastok_chart.draw($.lastok_chart_data, chart_options);
                 // animate the display of the chart
@@ -1038,7 +1026,6 @@ $(function() {
                 draw_chart();
               }
             }
-
           },
         },
 
