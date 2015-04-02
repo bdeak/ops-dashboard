@@ -858,7 +858,7 @@ $(function() {
         }
         $.frame_manager_infobar.queue_add("adjust_size", element, true);
 
-        show_lastok_chart(true);
+        lastok_chart.show[$.config.last_ok.chart.type](true);
 
       }
       return {columns: proposed_columns, rows: proposed_rows, tile_sizex: proposed_tile_sizex, tile_sizey: proposed_tile_sizey, tiles_max: proposed_tiles_max};
@@ -922,124 +922,134 @@ $(function() {
         ajaxCall($.personnel_url, 'GET', null, successAction);
       };
 
+      lastok_chart = {
 
-      function show_lastok_chart(no_refresh) {
+        show: {
 
-         // fill the data structure for the chart with the data that was fetched
-         successAction = function(json_data, status, xhr) {
+          bar: function (no_refresh) {
 
-          if ($.lastok_chart_data === undefined) {
-            console.debug("init");
-            $.lastok_chart_data = new google.visualization.DataTable();
-            // add the columns, with custom roles for tooltips and coloring
-            $.lastok_chart_data.addColumn('string', "Range name");
-            $.lastok_chart_data.addColumn('number', "OK");
-            $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
-            $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
-            $.lastok_chart_data.addColumn('number', "Problem");
-            $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
-            $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
-            $.lastok_chart_data.addRows($.assocArraySize(json_data));
-          }
+             // fill the data structure for the chart with the data that was fetched
+             successAction = function(json_data, status, xhr) {
 
-          // check if the number of rows needs to be adjusted
-          var animate = true;
-          var need_redraw = false;
-          if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
-            console.debug("changing");
-            if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
-              // need to remove rows
-              $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
-            } else {
-              // need to add more rows
-              console.debug("adding more rows");
-              $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
-            }
-            need_redraw = true;
-            animate = false;
-          }
+              if ($.lastok_chart_data === undefined) {
+                console.debug("init");
+                $.lastok_chart_data = new google.visualization.DataTable();
+                // add the columns, with custom roles for tooltips and coloring
+                $.lastok_chart_data.addColumn('date', "Date");
+                $.lastok_chart_data.addColumn('number', "OK");
+                $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+                $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+                $.lastok_chart_data.addColumn('number', "Problem");
+                $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+                $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+                $.lastok_chart_data.addRows($.assocArraySize(json_data));
+              }
 
-          // populate the colums with data
-          for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
-            var i=0;
-            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["range_name"] + row);
-            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["OK"]);
-            $.lastok_chart_data.setValue(row, i++, "{0}: OK: {1}".format(json_data[row+1]["range_name_long"], 
-                                                   json_data[row+1]["duration_human"]["OK"]));
-            $.lastok_chart_data.setValue(row, i++, "fill-color: #39CD14; stroke-color: #1B8200; color: #FFFFFF");
-            $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["PROBLEM"]);
-            $.lastok_chart_data.setValue(row, i++, "{0}: Problem: {1}".format(json_data[row+1]["range_name_long"], 
-                                                   json_data[row+1]["duration_human"]["PROBLEM"]));            
-            $.lastok_chart_data.setValue(row, i++, "stroke-color: #A40000; color: #FF1414");
-          }
+              // check if the number of rows needs to be adjusted
+              var animate = true;
+              var need_redraw = false;
+              if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
+                console.debug("changing");
+                if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
+                  // need to remove rows
+                  $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
+                } else {
+                  // need to add more rows
+                  console.debug("adding more rows");
+                  $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
+                }
+                need_redraw = true;
+                animate = false;
+              }
 
-          // finally, draw the chart
-          if (need_redraw) {
-            hide_lastok_chart();
-          }
-          draw_chart(animate);
+              // populate the colums with data
+              for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
+                var i=0;
+                $.lastok_chart_data.setValue(row, i++, new Date(json_data[row+1]["range_start"] + 1));
+                $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["OK"]);
+                $.lastok_chart_data.setValue(row, i++, "{0}: OK: {1}".format(json_data[row+1]["range_name_long"], 
+                                                       json_data[row+1]["duration_human"]["OK"]));
+                $.lastok_chart_data.setValue(row, i++, "stroke-color: {0}; fill-color: {1}".format($.config.last_ok.chart.bar.color.OK.outline,
+                                                                                                   $.config.last_ok.chart.bar.color.OK.fill));
+                $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_sec"]["PROBLEM"]);
+                $.lastok_chart_data.setValue(row, i++, "{0}: Problem: {1}".format(json_data[row+1]["range_name_long"], 
+                                                       json_data[row+1]["duration_human"]["PROBLEM"]));            
+                $.lastok_chart_data.setValue(row, i++, "stroke-color: {0}; fill-color: {1}".format($.config.last_ok.chart.bar.color.PROBLEM.outline,
+                                                                                                   $.config.last_ok.chart.bar.color.PROBLEM.fill));
+              }
 
-        }
+              // finally, draw the chart
+              if (need_redraw) {
+                hide_lastok_chart();
+              }
+              draw_chart(animate);
 
-        // draw the chart based on the already filled data
-        draw_chart = function(animate) {
-
-          animate = animate || false;
-
-          if ($.lastok_chart_data !== undefined) {
-
-            if ($.lastok_chart === undefined) {
-              $("#chart-container").hide();
-              $.lastok_chart = new google.visualization.ColumnChart($("#chart-container")[0]);
             }
 
-            // calculate the height and width of the chart - unfortuantely google charts is not responsive
-            // 12vw
-            var chart_width = ($(window).width() / 100) * 12;
-            var chart_height = ($(window).width() / 100) * 3.5;
+            // draw the chart based on the already filled data
+            draw_chart = function(animate) {
 
-            var chart_options = {'title':'OK/Problem state trend',
-                           width: chart_width,
-                           height: chart_height,
-                           backgroundColor: 'black',
-                           animation: { duration: 0, easing: 'out', startup: false },
-                           vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none' },
-                           hAxis: { textPosition: 'in', textStyle: { color: 'white', bold: false, fontName: 'Arial' } },
-                           isStacked: true,
-                           legend: { position: 'none' },
-                           bar: { groupWidth: '90%' },
-                           chartArea: { left: 0, top: 0, width: '100%', height: '90%' }, 
-                         };
+              animate = animate || false;
 
-            if (animate) {
-              chart_options.animation.duration = 1000;
+              if ($.lastok_chart_data !== undefined) {
+
+                if ($.lastok_chart === undefined) {
+                  $("#chart-container").hide();
+                  $.lastok_chart = new google.visualization.ColumnChart($("#chart-container")[0]);
+                }
+
+                // calculate the height and width of the chart - unfortuantely google charts is not responsive
+                // 12vw
+                var chart_width = ($(window).width() / 100) * 12;
+                var chart_height = ($(window).width() / 100) * 3.5;
+
+                var chart_options = {'title':'OK/Problem state trend',
+                               width: chart_width,
+                               height: chart_height,
+                               backgroundColor: 'transparent',
+                               animation: { duration: 0, easing: 'out', startup: false },
+                               vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none', baselineColor: 'transparent'},
+                               hAxis: { textPosition: 'in', textStyle: { color: 'white', bold: false, fontName: 'Arial' }, baselineColor: 'transparent' },
+                               isStacked: true,
+                               legend: { position: 'none' },
+                               bar: { groupWidth: '90%' },
+                               chartArea: { left: 0, top: 0, width: '100%', height: '90%' },
+                             };
+
+                if (animate) {
+                  chart_options.animation.duration = 1000;
+                }
+
+                // draw the chart
+                $.lastok_chart.draw($.lastok_chart_data, chart_options);
+                // animate the display of the chart
+                $('#chart-container').show("blind", {direction: "down", easing: "easeOutCirc"}, 1000);
+              }
             }
 
-            // draw the chart
-            $.lastok_chart.draw($.lastok_chart_data, chart_options);
-            // animate the display of the chart
-            $('#chart-container').show("blind", {direction: "down", easing: "easeOutCirc"}, 1000);
-          }
-        }
+            no_refresh = no_refresh || false;
 
-        no_refresh = no_refresh || false;
+            if ($.config['last_ok']["chart"]['enabled'] === true) {
+              if (no_refresh !== true) {
+                ajaxCall($.lastok_chart_url, 'GET', null, successAction);
+                // set up next round
+                $.myTimeout("lastok_chart", lastok_chart.show[$.config.last_ok.chart.type], 2000);
+              } else {
+                draw_chart();
+              }
+            }
 
-        if ($.config['last_ok']['show_chart'] === true) {
-          if (no_refresh !== true) {
-            ajaxCall($.lastok_chart_url, 'GET', null, successAction);
-            // set up next round
-            $.myTimeout("lastok_chart", show_lastok_chart, 2000);
-          } else {
-            draw_chart();
-          }
-        }
+          },
+        },
 
-      };
+      hide: {
+        // hide the chart, required for window resizing, as unfortunately the google charts are not responsive
+        bar: function() {
+            $('#chart-container').hide("blind", {direction: "down", easing: "easeOutCirc"}, 200);
+        },
+      },
+    };
 
-      // hide the chart, required for window resizing, as unfortunately the google charts are not responsive
-      function hide_lastok_chart() {
-        $('#chart-container').hide("blind", {direction: "down", easing: "easeOutCirc"}, 200);
-      };
 
       // get the lastok state
       function show_lastok() {
@@ -1415,6 +1425,12 @@ $(function() {
 
           $.debug = $.config["debug"]["frontend"]["main"] || false;
 
+          // show the charts early
+          if ($.config.last_ok.chart.enabled) {
+            $.myTimeout("lastok_chart", lastok_chart.show[$.config.last_ok.chart.type], 200);
+            $( window ).resize( _.debounce(lastok_chart.hide[$.config.last_ok.chart.type], 100) );
+          }
+
           // draw the grid/initialize $.frame_manager, now with default values
           draw_grid();
           draw_grid_infobar();
@@ -1483,6 +1499,7 @@ $(function() {
     // start fetching the data
     $.monitor_data = null;
     $.metadata = null;
+
     get_monitor_data();
 
     // show the time, set periodical call
@@ -1498,14 +1515,12 @@ $(function() {
     // use debounce from underscore.js to avoid bouncing effect
     // http://stackoverflow.com/a/17754746
     $( window ).resize( _.debounce(detect_display_options, 200) );
-    $( window ).resize( _.debounce(hide_lastok_chart, 100) );
 
 
     // set the initial freshness timestamp
     $.alive_timestamp = new Date().getTime() / 1000;
 
     $.myTimeout("worker", worker, $.queue_tick_time * 2);
-    $.myTimeout("lastok_chart", show_lastok_chart, 200);
 
     // create a one-shot version of detect_display_options, to be called one time from get_monitor_data() and get_user_messages()
     $.once_detectdisplay_monitordata = _.once(detect_display_options);
