@@ -126,6 +126,15 @@ function convert_seconds_to_duration ($seconds) {
 	return sprintf("%ds", $seconds);
 }
 
+function convert_seconds_to_hours ($seconds) {
+	return sprintf("%01.1f", $seconds / (60 * 60));
+}
+
+function convert_seconds_to_percentage ($seconds, $grouping) {
+	return sprintf("%01.1f", ($seconds * 100) / (60 * 60 * 24 * $grouping));
+}
+
+
 # to avoid the apc cache entries for different instances of the dashboard
 # to be confused, all key names are hashes of their names and the base directory
 # (which needs to be unique)

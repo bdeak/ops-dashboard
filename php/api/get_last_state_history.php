@@ -3,12 +3,12 @@ require_once (dirname(__FILE__)."/../lib/sqlite.php");
 require_once (dirname(__FILE__)."/../lib/common.php");
 require_once(dirname(__FILE__)."/../../config/config.php");
 
-function inflate_and_group_state_data($days, $grouping) {
+function inflate_and_group_state_data($days, $grouping_name) {
 	global $config, $l, $lookup;
 
-	$l->info(sprintf("Getting the state history for %d days using grouping '%s'", $days, $grouping));
+	$l->info(sprintf("Getting the state history for %d days using grouping '%s'", $days, $grouping_name));
 
-	switch ($grouping) {
+	switch ($grouping_name) {
 		case 'day':
 			$grouping = 1;
 			break;
@@ -19,7 +19,7 @@ function inflate_and_group_state_data($days, $grouping) {
 			$grouping = 30; # yeah...
 			break;
 		default:
-			handle_error("Undefined grouping parameter: " . $grouping);
+			handle_error("Undefined grouping parameter: " . $grouping_name);
 			break;
 	}
 	
@@ -31,6 +31,7 @@ function inflate_and_group_state_data($days, $grouping) {
 	$range_start = strtotime("0:00", strtotime(sprintf("-%s days", $days)));
 	for ($i = 1; $i <= $intervals; $i++) {
 		# define the start and the end of the intervals
+		$history[$i]["grouping"] = $grouping_name;
 		$history[$i]["range_start"] = $range_start;
 		$history[$i]["range_end"] = $range_start + $grouping * 60 * 60 * 24;
 		$history[$i]["range_start_human"] = date('jS F Y h:i:s A (T)', $history[$i]["range_start"]);
@@ -83,6 +84,10 @@ function inflate_and_group_state_data($days, $grouping) {
 	foreach ($history as $interval => $value) {
 		$history[$interval]["duration_human"]["OK"] = convert_seconds_to_duration($history[$interval]["duration_sec"]["OK"]);
 		$history[$interval]["duration_human"]["PROBLEM"] = convert_seconds_to_duration($history[$interval]["duration_sec"]["PROBLEM"]);
+		$history[$interval]["duration_percent"]["OK"] = convert_seconds_to_percentage($history[$interval]["duration_sec"]["OK"], $grouping);
+		$history[$interval]["duration_percent"]["PROBLEM"] = convert_seconds_to_percentage($history[$interval]["duration_sec"]["PROBLEM"], $grouping);		
+		#$history[$interval]["duration_hour"]["OK"] = convert_seconds_to_hours($history[$interval]["duration_sec"]["OK"]);
+		#$history[$interval]["duration_hour"]["PROBLEM"] = convert_seconds_to_hours($history[$interval]["duration_sec"]["PROBLEM"]);
 	}
 
 	return $history;
