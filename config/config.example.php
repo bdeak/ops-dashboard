@@ -96,7 +96,21 @@ $config["priority_lookup"]["enabled"] = false;
 #$config["priority_lookup"]["method"] = "testsuit";
 #################################################################
 # log the state changes and show the time since in error, or how long in ok?
-$config["show_last_ok"] = true;
+$config["last_ok"]["enabled"] = true;
+$config["last_ok"]["chart"]["enabled"] = true;
+# what type of chart to display
+# possibilities: bar, line
+$config["last_ok"]["chart"]["type"] = "line";
+# bar chart options
+$config["last_ok"]["chart"]["bar"]["color"]["OK"]["outline"] = "#DDDDDD";
+$config["last_ok"]["chart"]["bar"]["color"]["OK"]["fill"] = "#DDDDDD";
+$config["last_ok"]["chart"]["bar"]["color"]["PROBLEM"]["outline"] = "#999999";
+$config["last_ok"]["chart"]["bar"]["color"]["PROBLEM"]["fill"] = "#999999";
+# line chart options
+$config["last_ok"]["chart"]["line"]["color"]["OK"] = "#DDDDDD";
+# area chart options
+$config["last_ok"]["chart"]["area"]["color"]["OK"]["outline"] = "#DDDDDD";
+$config["last_ok"]["chart"]["area"]["color"]["PROBLEM"]["fill"] = "#999999";
 #################################################################
 $config["log"]["timezone"] = "Europe/Berlin";
 #################################################################
@@ -183,3 +197,4 @@ $config["show_outdated"]["icinga"]["threshold"] = 5;
 #############################################################################################################
 $config["debug"]["frontend"]["main"] = false;
 $config["debug"]["frontend"]["tile_manager"] = false;
+#############################################################################################################
