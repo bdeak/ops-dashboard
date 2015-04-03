@@ -931,7 +931,6 @@ $(function() {
              // fill the data structure for the chart with the data that was fetched
              successAction = function(json_data, status, xhr) {
               if ($.lastok_chart_data === undefined) {
-                console.debug("init");
                 $.lastok_chart_data = new google.visualization.DataTable();
                 // add the columns, with custom roles for tooltips and coloring
                 $.lastok_chart_data.addColumn('string', "Date");
@@ -947,13 +946,11 @@ $(function() {
               var animate = true;
               var need_redraw = false;
               if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
-                console.debug("changing");
                 if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
                   // need to remove rows
                   $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
                 } else {
                   // need to add more rows
-                  console.debug("adding more rows");
                   $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
                 }
                 need_redraw = true;
@@ -1009,17 +1006,16 @@ $(function() {
                 var chart_width = ($(window).width() / 100) * 15;
                 var chart_height = ($(window).width() / 100) * 3.5;
                 var margin_top = ($(window).width() / 100) * 1.2 / 60 * 10;
-                var chart_options = {'title':'OK/Problem state trend',
-                               width: chart_width,
-                               height: chart_height,
-                               backgroundColor: 'transparent',
-                               animation: { duration: 0, easing: 'out', startup: false },
-                               vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none', baselineColor: 'transparent'},
-                               hAxis: { gridlines: { color: 'transparent' }, format: "dd", textPosition: 'in', textStyle: { color: 'black', bold: false, fontName: 'Arial' }, baselineColor: 'transparent' },
-                               isStacked: true,
-                               legend: { position: 'none' },
-                               bar: { groupWidth: '90%' },
-                               chartArea: { left: 0, top: margin_top, width: '100%', height: '85%' },
+                var chart_options = {  width: chart_width,
+                                       height: chart_height,
+                                       backgroundColor: 'transparent',
+                                       animation: { duration: 0, easing: 'out', startup: false },
+                                       vAxis: { gridlines: { color: 'transparent' }, textPosition: 'none', baselineColor: 'transparent'},
+                                       hAxis: { gridlines: { color: 'transparent' }, format: "dd", textPosition: 'in', textStyle: { color: 'black', bold: false, fontName: 'Arial' }, baselineColor: 'transparent' },
+                                       isStacked: true,
+                                       legend: { position: 'none' },
+                                       bar: { groupWidth: '90%' },
+                                       chartArea: { left: 0, top: margin_top, width: '100%', height: '85%' },
                              };
                 if (animate) {
                   chart_options.animation.duration = 1000;
@@ -1043,13 +1039,14 @@ $(function() {
               }
             }
           },
+
+          // line chart
           line: function (no_refresh) {
 
            // fill the data structure for the chart with the data that was fetched
            successAction = function(json_data, status, xhr) {
 
             if ($.lastok_chart_data === undefined) {
-              console.debug("init");
               $.lastok_chart_data = new google.visualization.DataTable();
               // add the columns, with custom roles for tooltips and coloring
               $.lastok_chart_data.addColumn('string', "Date");
@@ -1061,13 +1058,11 @@ $(function() {
 
             // check if the number of rows needs to be adjusted
             if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
-              console.debug("changing");
               if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
                 // need to remove rows
                 $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
               } else {
                 // need to add more rows
-                console.debug("adding more rows");
                 $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
               }
             }
@@ -1121,18 +1116,131 @@ $(function() {
               var margin_top = ($(window).width() / 100) * 2 / 60 * 10;
 
 
-              var chart_options = {'title':'OK/Problem state trend',
-                                    width: chart_width,
+              var chart_options = { width: chart_width,
                                     height: chart_height,
-                                    backgroundColor: 'black',
+                                    backgroundColor: 'transparent',
                                     animation: { duration: 1000, easing: 'out', startup: true },
-                                    vAxis: { ticks: [0, 50, 100] , gridlines: { color: '#585858' }, textPosition: 'out', baselineColor: 'grey', textStyle: { color: 'white'}, viewWindow: {min: 0, max: 100}, format: '#\'%\'', title: 'Percentage of OK state' },
+                                    vAxis: { ticks: [0, 50, 100] , gridlines: { color: '#585858' }, textPosition: 'out', baselineColor: 'grey', textStyle: { color: 'white'}, viewWindow: {min: 0, max: 100}, format: '#\'%\''},
                                     hAxis: { gridlines: { color: 'transparent' }, textPosition: 'out', textStyle: { color: 'white' }, baselineColor: 'transparent' },
                                     legend: { position: 'none' },
                                     chartArea: { left: 0, top: 0, width: '100%', height: '80%' }, 
                                     curveType: 'function',
                                     chartArea: { top: margin_top },
-                                    pointSize: 2,
+                                    pointSize: 0,
+                                  };
+
+              if (animate === false) {
+                chart_options.animation.duration = 0;
+                chart_options.animation.startup = false;
+              }
+
+              // draw the chart
+              $.lastok_chart.draw($.lastok_chart_data, chart_options);
+              // animate the display of the chart
+              $('#chart-container').show("fade", {direction: "down", easing: "easeOutCirc"}, 1000);
+            }
+          }
+
+          no_refresh = no_refresh || false;
+
+          if ($.config['last_ok']['chart']['enabled'] === true) {
+            if (no_refresh !== true) {
+              ajaxCall($.lastok_chart_url, 'GET', null, successAction);
+              // set up next round
+              $.myTimeout("lastok_chart", lastok_chart.show.line, 2 * 60 * 1000);
+            } else {
+              draw_chart(false);
+            }
+          }
+        },  
+
+        // area chart 
+        area: function (no_refresh) {
+
+           // fill the data structure for the chart with the data that was fetched
+           successAction = function(json_data, status, xhr) {
+
+            if ($.lastok_chart_data === undefined) {
+              $.lastok_chart_data = new google.visualization.DataTable();
+              // add the columns, with custom roles for tooltips and coloring
+              $.lastok_chart_data.addColumn('string', "Date");
+              $.lastok_chart_data.addColumn('number', "OK");
+              $.lastok_chart_data.addColumn({type: 'string', role: 'tooltip'});
+              $.lastok_chart_data.addColumn({type: 'string', role: 'style'});
+              $.lastok_chart_data.addRows($.assocArraySize(json_data));
+            }
+
+            // check if the number of rows needs to be adjusted
+            if (($.lastok_chart_data.getNumberOfRows()) != $.assocArraySize(json_data)) {
+              if (($.lastok_chart_data.getNumberOfRows()) > $.assocArraySize(json_data)) {
+                // need to remove rows
+                $.lastok_chart_data.removeRows(0, $.lastok_chart_data.getNumberOfRows() - $.assocArraySize(json_data));
+              } else {
+                // need to add more rows
+                $.lastok_chart_data.addRows($.assocArraySize(json_data) - $.lastok_chart_data.getNumberOfRows());
+              }
+            }
+
+            // populate the colums with data
+            for (var row = 0 ; row < $.assocArraySize(json_data) ; row++) {
+              var i=0;
+
+              var formatterDate;
+              // formatter patterns from http://userguide.icu-project.org/formatparse/datetime#TOC-DateTimePatternGenerator
+              if (json_data[row+1]["grouping"] == "day") {
+                formatterDate = new google.visualization.DateFormat({pattern: 'EEE'});
+              } else if (json_data[row+1]["grouping"] == "week") {
+                formatterDate = new google.visualization.DateFormat({pattern: 'CWww'});
+              } else if (json_data[row+1]["grouping"] == "month") {
+                formatterDate = new google.visualization.DateFormat({pattern: 'MMM'});
+              } else {
+                // unrecognized
+                formatterDate = new google.visualization.DateFormat({pattern: 'yyyy.MM.dd'});
+              }
+
+              $.lastok_chart_data.setValue(row, i++, formatterDate.formatValue(new Date((json_data[row+1]["range_start"] + 1) * 1000)));
+              $.lastok_chart_data.setValue(row, i++, json_data[row+1]["duration_percent"]["OK"]);
+              $.lastok_chart_data.setValue(row, i++, "{0}: OK: {1}".format(json_data[row+1]["range_name_long"], 
+                                                     json_data[row+1]["duration_human"]["OK"]));
+              $.lastok_chart_data.setValue(row, i++, "color: {0}".format($.config.last_ok.chart.line.color.OK));
+            }
+
+            draw_chart();
+
+          }
+
+          // draw the chart based on the already filled data
+          draw_chart = function(animate) {
+
+            if (!_.isBoolean(animate)) {
+              animate = true;
+            }
+
+            if ($.lastok_chart_data !== undefined) {
+
+              if ($.lastok_chart === undefined) {
+                $("#chart-container").removeClass("hidden").hide();
+                $.lastok_chart = new google.visualization.AreaChart($("#chart-container")[0]);
+              }
+
+              // calculate the height and width of the chart - unfortuantely google charts is not responsive
+              // 12vw
+              var chart_width = ($(window).width() / 100) * 15;
+              var chart_height = ($(window).width() / 100) * 3.3;
+              var margin_top = ($(window).width() / 100) * 2 / 60 * 10;
+
+
+              var chart_options = { width: chart_width,
+                                    height: chart_height,
+                                    backgroundColor: 'transparent',
+                                    animation: { duration: 1000, easing: 'out', startup: true },
+                                    vAxis: { ticks: [0, 50, 100] , gridlines: { color: '#585858' }, textPosition: 'out', baselineColor: 'grey', textStyle: { color: 'white'}, viewWindow: {min: 0, max: 100}, format: '#\'%\'' },
+                                    hAxis: { gridlines: { color: 'transparent' }, textPosition: 'out', textStyle: { color: 'white' }, baselineColor: 'transparent' },
+                                    legend: { position: 'none' },
+                                    chartArea: { left: 0, top: 0, width: '100%', height: '80%' }, 
+                                    curveType: 'function',
+                                    chartArea: { top: margin_top },
+                                    pointSize: 0,
                                   };
 
               if (animate === false) {
@@ -1169,7 +1277,10 @@ $(function() {
 
         line: function() {
             $('#chart-container').hide("fade", {direction: "down", easing: "easeOutCirc"}, 500);
-        },        
+        },
+        area: function() {
+            $('#chart-container').hide("fade", {direction: "down", easing: "easeOutCirc"}, 500);
+        },               
       },
     };
 
