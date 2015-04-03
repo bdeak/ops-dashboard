@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <meta charset="utf-8">
+    <title>Ops Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <meta name="author" content="Balint Deak">
+
+    <!-- include the stylesheets -->
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="shortcut icon" href="img/favicon.ico">
+    
+    <!-- google fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Architects+Daughter|Alegreya+Sans+SC:400,800|Sigmar+One|Exo+2:400,800|Ultra|Bowlby+One+SC|Play:400,700' rel='
+    stylesheet' type='text/css'>
+
+    <!-- include the needed libraries -->
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/underscore-1.5.2.js"></script>
+    <script src="js/backbone-1.1.0.js"></script>
+    <!-- jquery plugins -->
+    <script src="js/jquery.md5.js"></script>
+    <script src="js/jquery.actual.js"></script>
+    <script src="js/purl.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <!-- for charting -->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load('visualization', '1.0', {'packages':['corechart']});
+    </script>
+    <script src="js/dashboard-logic.js"></script>
+    <script src="js/tile-manager.js"></script>
+
+  </head>
+
+  <body>
+      <div class="page-header">
+        <div class="main-title">Icinga <span class="subtitle">dashboard</span></div>
+        <div id="spacer"></div>
+            <div id="chart-container" class="header-container chart-container hidden"></div>
+            <span class="container-separator"></span>            
+            <div id="lastok-container" class="header-container hidden">
+                <span class="glyphicon topicon"></span>
+                <span id="lastok"></span>
+            </div>        
+            <span class="container-separator"></span>
+            <div id="aod-container" class="header-container hidden">
+                <span class="glyphicon topicon"></span>
+                <span id="aod"></span>
+            </div>
+            <span class="container-separator"></span>
+            <div id="oncall-container" class="header-container hidden">
+                <span class="glyphicon topicon"></span>
+                <span id="oncall"></span>
+            </div>
+            <span class="container-separator"></span> 
+            <div id="date-container" class="header-container">
+                <span id="date"></span>
+            </div>
+            <span class="container-separator"></span>
+            <div id='clock-container' class="header-container">
+                <span id='hour'>00</span>
+                <span id="colon">:</span>
+                <span id="minutes">00</span>
+            </div>
+      </div>
+      <div style="clear:both;"></div>
+
+      <div id='everything'></div>
+
+      <div id="msg_container_outer">
+        <div id="msg_container_main"></div>
+      </div>
+      
+      <div style="clear:both;"></div>
+
+      <div id='infobar'></div>
+  </body>
+</html>
