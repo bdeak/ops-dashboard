@@ -25,6 +25,12 @@ foreach (glob(dirname(__FILE__)."/../lib/sort_methods/*.php") as $filename)
     require_once $filename;
 }
 
+# require all grouping methods
+foreach (glob(dirname(__FILE__)."/../lib/grouping/*.php") as $filename)
+{
+    require_once $filename;
+}
+
 header('Content-type: application/json');
 
 ###########################################################
@@ -51,7 +57,7 @@ $l->info("Getting the status data using lookup method '$lookup_method'");
 $statuses = apc_fetch(get_apc_hash_key("status"));
 if ($statuses !== false) {
 	# found in cache
-	$l->info("Found the alert history information in the cache");
+	$l->info("Found the status information in the cache");
 } else {
 	$statuses = call_user_func("$lookup_func");
 	# check again to see if it hasn't been put there by another process
@@ -146,9 +152,20 @@ if ($alert_history !== null) {
 	}
 }
 
+# group the same services on different machines - if needed
+if ($config["grouping"]["service"]["enabled"] === true) {
+	$grouping_method = $config["grouping"]["service"]["method"];
+	$grouping_func = sprintf("do_grouping_%s", $grouping_method);
+	# check if the given function exists
+	if (! function_exists($grouping_func)) {
+		handle_error("Service grouping function '$grouping_func' is not defined for lookup method '$grouping_method'!");
+	}
+	$statuses = call_user_func_array("$grouping_func", Array(&$statuses));
+
+}
+
+
 # sort the statuses hash
-
-
 $sort_method_func = sprintf('cmp_%s', $config["sort_method"]);
 if (! function_exists($sort_method_func)) {
 	handle_error(sprintf("Function '%s' doesn't exist for sorting method '%s'!", $sort_method_func, $config["sort_method"]));
