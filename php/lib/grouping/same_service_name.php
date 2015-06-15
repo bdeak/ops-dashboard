@@ -70,7 +70,7 @@ function do_grouping_same_service_name(&$statuses) {
             $statuses_result["status"][$md5_grouped]["alert_active"] = $alert_active;
             $statuses_result["status"][$md5_grouped]["is_flapping"] = $is_flapping;
             $statuses_result["status"][$md5_grouped]["is_soft"] = $is_soft;
-            $statuses_result["status"][$md5_grouped]["is_grouped"] = 1;
+            $statuses_result["status"][$md5_grouped]["is_grouped"] = true;
             $statuses_result["status"][$md5_grouped]["group_size"] = count($group);
             # get the entries for this group
             $entries = get_elements_by_key($statuses["status"], $group);

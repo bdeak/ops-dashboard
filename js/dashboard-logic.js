@@ -6,11 +6,15 @@ $(function() {
                           <!-- index: {index}, left: {left}, top: {top} -->\n\
                           <div class="alert alert-{state} tile">\n\
                             <div class="priority">{priority}</div>\n\
+                            <div class="icon_holder">\n\
+                              <span class="icon is_grouped glyphicon glyphicon-th {is_grouped_hidden}"></span>\n\
+                            </div>\n\
                             <div class="tile-rest">\n\
                               <div class="service {service_hidden}">{service}</div>\n\
                               <div class="host">{host}</div>\n\
                               <div class="tag_holder">\n\
                                 <span class="dashtag alert_active blink {alert_active_hidden}">alert active</span>\n\
+                                <span class="dashtag group_size {is_grouped_hidden}">{group_size}</span>\n\
                                 <span class="dashtag is_flapping {is_flapping_hidden}">flapping</span>\n\
                                 <span class="dashtag is_soft {is_soft_hidden}">SOFT</span>\n\
                                 <span class="dashtag">{duration}</span>\n\
@@ -73,6 +77,7 @@ $(function() {
         }
 
 		var priority = (object['priority'] == 0 ? "" : object['priority']);
+    var is_grouped_hidden = (object['is_grouped'] === true ? "" : "hidden");
 		var alert_active_hidden = (object['alert_active'] === true ? "" : "hidden");
 		var is_flapping_hidden = (object['is_flapping'] === true ? "" : "hidden");
 		var is_soft_hidden = (object['is_soft'] === true ? "" : "hidden");
@@ -89,6 +94,8 @@ $(function() {
 			service_hidden: service_hidden,
 			service: ("service" in object ? object['service'].replace(/^Systemcheck/, "SC:") : null),
 			host: object["host"],
+      is_grouped_hidden: is_grouped_hidden,
+      group_size: object['group_size'],
 			alert_active_hidden: alert_active_hidden,
 			is_flapping_hidden: is_flapping_hidden,
 			is_soft_hidden: is_soft_hidden,
@@ -322,10 +329,19 @@ $(function() {
       $.each(data, function(index, obj) {
         // update duration
         // get the div with the current id (md5id), update the duration
-        var tile = $("#" + obj["md5id"]).find(".duration")
+        var tile = $("#" + obj["md5id"]).find(".duration");
         tile.html(obj["duration"]);
         // unbind the selector to avoid memleaks
         tile.unbind();
+
+        // check if the group size is shown, if yes, update it
+        var tile = $("#" + obj["md5id"]).find(".group_size");
+        if (tile.length) {
+          tile.html(obj["group_size"]);
+          // unbind the selector to avoid memleaks
+        }
+        tile.unbind();
+
 
         change_tile_state_if_needed(obj["md5id"], obj["status"]);
 
