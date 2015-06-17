@@ -21,6 +21,7 @@ $exposable_configuration_keys = Array(
 	"user_msg",
 	"show_outdated",
 	"debug",
+	"grouping",
 	);
 
 function expose_configuration () {

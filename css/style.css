@@ -248,6 +248,9 @@ body, html {
 }
 
 .host {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;    
     order: 2;
     font-size: 1.65em;
     line-height: 1.35em;

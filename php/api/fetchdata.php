@@ -164,6 +164,18 @@ if ($config["grouping"]["service"]["enabled"] === true) {
 
 }
 
+# group services of the same host into one check - if needed
+if ($config["grouping"]["host"]["enabled"] === true) {
+	$grouping_method = $config["grouping"]["host"]["method"];
+	$grouping_func = sprintf("do_grouping_%s", $grouping_method);
+	# check if the given function exists
+	if (! function_exists($grouping_func)) {
+		handle_error("Service grouping function '$grouping_func' is not defined for lookup method '$grouping_method'!");
+	}
+	$statuses = call_user_func_array("$grouping_func", Array(&$statuses));
+
+}
+
 
 # sort the statuses hash
 $sort_method_func = sprintf('cmp_%s', $config["sort_method"]);
