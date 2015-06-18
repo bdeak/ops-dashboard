@@ -44,7 +44,7 @@ function do_grouping_same_service_name(&$statuses) {
             # determine the common hostnames, find a common pattern
             if ($config["grouping"]["service"]["group_hostname"]["enabled"] === true) {
                 $tolerance = $config["grouping"]["service"]["group_hostname"]["tolerance"] / 100;
-                $host = get_common_hostnames($statuses, $group, $tolerance);               
+                $host = get_common_hostnames($statuses, $group, $tolerance);
             }
             # if one is critical, this is critical
             $status = get_common_status($statuses, $group);
@@ -148,211 +148,188 @@ function cmp_status($a, $b) {
     }
 }
 
+# get the hostname patterns that represent the hosts that are grouped into this check
 function get_common_hostnames($statuses, $group, $tolerance) {
     global $l;
     # filter the elements of $statuses based on the provided list of md5s (in $group)
     $entries = Array();
     $entries = get_elements_by_key($statuses["status"], $group);
+
+    # get the hostnames out of the entries
     $hostnames = get_hostnames($entries);
     
-    $hostname = get_hostname_patterns($hostnames, $tolerance);
-#    $tmp1 = str_split("3capp-*-bs01");
-#    $tmp2 = str_split("3capp-wh*-bs01");
-#    $tmp_res = diff($tmp1, $tmp2);
-#    $l->debug(print_r($tmp_res, true));
+    # get the patterns (as a string)
+    $hostname_pattern = get_hostname_patterns($hostnames, $tolerance);
 
-    #$l->debug($hostname);
-    #return implode(":", $hostnames);
+    return $hostname_pattern;
 }
 
-#function get_hostname_patterns($hostnames, $diff_threshold) {
-#    $matching = Array();
-#    $not_matching = Array();
-#    $tmp = Array();
-#    foreach ($hostnames as $key => $value) {
-#        # 
-#    }
-#
-#}
-
-function get_hostname_patterns($hostnames, $tolerance = 0.2) {
+# get the patterns
+# tolerance: how much percentage of a change to allow before replacing with '*'
+# limit: how many patterns to return
+# the patterns that are covering the most hosts are returned first
+function get_hostname_patterns($hostnames, $tolerance = 0.2, $limit = 2) {
     global $l;
-    $hostmap = Array();
-    #$hostnames = Array("3capp-webde-bs01", "3capp-webde-bs02", "3capp-gmx-bs01");
-    # build a deeply nested hash, each character is one level
-    # example-host1, example-host2
-    # $hostmap["e"]["x"]["a"]["m"]["p"]["l"]["e"]["-"]["h"]["o"]["s"]["t"]["1"]
-    # $hostmap["e"]["x"]["a"]["m"]["p"]["l"]["e"]["-"]["h"]["o"]["s"]["t"]["2"]
-    #foreach ($hostnames as $index => $host) {
-    #    $keys = str_split($host);
-    #    $hostmap_tmp = array();
-    #    $arr = &$hostmap_tmp;
-    #    foreach ($keys as $key) {
-    #       $arr[$key] = array();
-    #       $arr = &$arr[$key];
-    #    }
-    #    unset($arr);
-    #    $hostmap = array_replace_recursive($hostmap, $hostmap_tmp);
-    #}
 
-    foreach ($hostnames as $index => $host) {
-        $elements = str_split($host);
-        array_push($hostmap, $elements);
-    }
+    # calculate the differences between the hostnames using the levenshtein() function
+    $differences = get_levenshtein_for_array($hostnames);
 
-    # get the longest of the hostnames
-    $lengths = array_map('strlen', $hostnames);
-    $max_length = max($lengths);
-    $host_count = count($hostnames);
+    # separate similar groups based on their levenshtein difference
+    $hostgroups = get_similar_groups($differences);
 
-    # pre-fill the helper array
-    $helper = array_fill(0, $max_length, null);
-    $helper_counts = array_fill(0, $max_length, 0);
+    # get the pattern that covers the given groups
+    $hostpatterns = get_hostpatterns_for_groups($hostgroups, $tolerance);
 
-    # compute the actual tolerance
-    $tolerance_actual = $host_count * $tolerance;
-    $l->debug("$host_count :: $tolerance :: $tolerance_actual");
+    # cut out the required elements (based on $limit), get only the 'pattern' field
+    $hostpatterns_result = array_map(function($a) {
+        return $a["pattern"];
+    }, array_slice($hostpatterns, 0, $limit));
 
-    for ($column = 0 ; $column < $max_length ; $column++) {
-        # compare each value on the same level
-        for ($row = 0 ; $row < $host_count ; $row++) {
-            if (isset($hostmap[$row][$column])) {
-                $current_char = $hostmap[$row][$column];
-            } else {
-                # out of bound
-                continue;
-            }
-            if ($helper[$column] === null) {
-                $helper[$column] = $current_char;
-            } elseif ($helper[$column] == $current_char) {
-                # nothing to do
-                continue;
-            } else {
-                # already occupied, change it to '*', but only if the tolerance level has been hit
-                $helper_counts[$column]++;
-                if ($helper_counts[$column] > $tolerance_actual) {
-                    $helper[$column] = '*';
+
+    # return the patterns as a string
+    return implode(", ", $hostpatterns_result);
+
+}
+
+# convert sets of hostnames into groups, where '*' replaces the characters that are different
+# example: host1 host2 host3 => pattern: host*
+function get_hostpatterns_for_groups($hostgroups, $tolerance) {
+
+    global $l;
+
+    $hostpatterns = Array();
+
+    # iterate on the different hostgroups
+    foreach ($hostgroups as $index => $hostgroup) {
+
+        $hostmap = Array();
+        $helper = Array();
+        $helper_counts = Array();
+
+        # split each hostname to an array
+        foreach ($hostgroup as $index => $host) {
+            $elements = str_split($host);
+            array_push($hostmap, $elements);
+        }
+
+        # get the longest of the hostnames
+        $lengths = array_map('strlen', $hostgroup);
+        $max_length = max($lengths);
+        $host_count = count($hostgroup);
+
+        # pre-fill the helper array
+        $helper = array_fill(0, $max_length, null);
+        $helper_counts = array_fill(0, $max_length, 0);
+
+        # compute the actual tolerance
+        $tolerance_actual = $host_count * $tolerance;
+
+        # iterate on the hostmap, mark characters that are different in the $helper array
+        # measure the number of differences in $helper_counts
+        # helper will in the end hold each character that is the same, and all differences as '*'
+        # in the end, holding the pattern itself
+        for ($column = 0 ; $column < $max_length ; $column++) {
+            # compare each value on the same level
+            for ($row = 0 ; $row < $host_count ; $row++) {
+                if (isset($hostmap[$row][$column])) {
+                    $current_char = $hostmap[$row][$column];
+                } else {
+                    # out of bound
+                    continue;
+                }
+                if ($helper[$column] === null) {
+                    $helper[$column] = $current_char;
+                } elseif ($helper[$column] == $current_char) {
+                    # nothing to do
+                    continue;
+                } else {
+                    # already occupied, change it to '*', but only if the tolerance level has been hit
+                    $helper_counts[$column]++;
+                    if ($helper_counts[$column] > $tolerance_actual) {
+                        $helper[$column] = '*';
+                    }
                 }
             }
         }
+
+        # join the elements of $helper to create the pattern
+        $hostpattern = implode("", $helper);
+        # replace double '*' values
+        $hostpattern = preg_replace("/\*+/", "*", $hostpattern);
+
+        # push the pattern into $hostpatterns
+        array_push($hostpatterns, Array("pattern" => $hostpattern, "hostcount" => $host_count));
     }
 
-    # throw out 
+    # sort the hostpatterns based on the numer of hosts that they represent
+    usort($hostpatterns, function ($a, $b) {
+            return $b["hostcount"] - $a["hostcount"];
+    });
 
-    $host_pattern = implode("", $helper);
-    # replace double '*' values
-    $host_pattern = preg_replace("/\*+/", "*", $host_pattern);
-
-    #$hostmap_mask = Array();
-    #$hostmap_new = $hostmap;
-
-    $l->debug("returning $host_pattern");
-
-    return $host_pattern;
-
-    #$tmp = Array();
-    #foreach ($hostmap_new as $key => $value) {
-    #    $l->debug("key is " . $key);
-    #    if (array_key_exists($key, $tmp)) {
-    #        $hostmap_new["*"] = $value;
-    #        unset($hostmap_new[$key]);
-    #    } else {
-    #        $tmp[$key] = 1;
-    #    }
-    #}
-    #unset($tmp);
-    #array_diff_assoc(array1, array2)
-
-    # traverse the $hostmap and generate a mask
-
-
-    #$var = array_walk_recursive_ext($hostmap, function($value, $key) use ($l) {
-#
-    #    $l->debug("key is $key");
-    #});
-#
-    #$l->debug("var is $var");
-
-    #$tmp = Array();
-    #$hostmap_new = Array();
-    #$marker = false;
-    #foreach ($hostmap as $key => $value) {
-    #    if (array_key_exists($key, $tmp)) {
-    #        $marker = true;
-    #        break;
-    #    }
-    #}
-    #if ($marker === true) {
-    #    # this level must be a '*'
-#
-    #} else {
-    #    $hostmap_new[$key] = $hostmap[$key];
-    #}
-
-    #$l->debug(print_r($hostmap_new, true));
-
-    #$hostmap = Array();
-    ## host1 host2 host3 host4
-    #array_walk($hostnames, function ($val, $key) use ($hostmap) {
-    #    $hostmap_in = Array();
-    #    $hostname_array = str_split($val);
-    #    # now walk the hostname_array also
-    #    # h o s t 1
-    #    array_walk($hostname_array, function($val_in, $key_in) use ($hostmap_in)) {
-    #        $hostmap_in[$val] = Array();
-    #    });
-    #});
-    #foreach ($hostnames as $index => $host) {
-    
-    #}
-
+    return $hostpatterns;
 }
 
-#function count_array_sizes($array) {
-#    if (is_array($array)) {
-#        # traverse
-#    } else {
-#        # end
-#    }
-#    # recurse
-#    count_array_sizes($array);
-#}
 
-# diff two arrays of strings to get the insert/delete operations that are required to transform one to another
-# source: https://github.com/paulgb/simplediff/blob/master/php/simplediff.php
-#function diff($old, $new){
-#    $matrix = array();
-#    $maxlen = 0;
-#    foreach($old as $oindex => $ovalue){
-#        $nkeys = array_keys($new, $ovalue);
-#        foreach($nkeys as $nindex){
-#            $matrix[$oindex][$nindex] = isset($matrix[$oindex - 1][$nindex - 1]) ?
-#                $matrix[$oindex - 1][$nindex - 1] + 1 : 1;
-#            if($matrix[$oindex][$nindex] > $maxlen){
-#                $maxlen = $matrix[$oindex][$nindex];
-#                $omax = $oindex + 1 - $maxlen;
-#                $nmax = $nindex + 1 - $maxlen;
-#            }
-#        }   
-#    }
-#    if($maxlen == 0) return array(array('d'=>$old, 'i'=>$new));
-#    return array_merge(
-#        diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)),
-#        array_slice($new, $nmax, $maxlen),
-#        diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen)));
-#}
-#
-#function htmlDiff($old, $new){
-#    $ret = '';
-#    $diff = diff(preg_split("/[\s]+/", $old), preg_split("/[\s]+/", $new));
-#    foreach($diff as $k){
-#        if(is_array($k))
-#            $ret .= (!empty($k['d'])?"<del>".implode(' ',$k['d'])."</del> ":'').
-#                (!empty($k['i'])?"<ins>".implode(' ',$k['i'])."</ins> ":'');
-#        else $ret .= $k . ' ';
-#    }
-#    return $ret;
-#}
+function get_levenshtein_for_array($array) {
+    $data = Array();
+    # get a permutation of all elements
+    foreach ($array as $index => $value) {
+        foreach ($array as $index2 => $value2) {
+            $data[$value][$value2] = levenshtein($value, $value2);
+        }
+    }
+    return $data;
+}
+
+/* like min(), but casts to int and ignores 0 */
+function min_not_null(Array $values) {
+    return min(array_diff($values, array(0)));
+}
+
+# group similar hostnames based on their levenshtein value
+# difference: how many differences (in the sense of levenshtein value) to allow before considering as different
+# input format: $array["host1"]["host2"] = difference;
+
+function get_similar_groups($array, $difference = 2) {
+    global $l;
+    $groups = Array();
+    # get a permutation of all elements
+    foreach ($array as $host1 => $subhash) {
+        # for each host find min, max and avg values
+        $min_diff = min_not_null(array_values($subhash));
+        $max_diff = max(array_values($subhash));
+        $avg_diff = array_sum(array_values($subhash)) / count(array_values($subhash));
+
+        # find groups that are only slightly different 
+        foreach ($subhash as $host2 => $score) {
+            if ($score > $difference) {
+                continue;
+            }
+            # store
+            if (!array_key_exists($host1, $groups)) {
+                $groups[$host1] = Array();
+            }
+            array_push($groups[$host1], $host2);
+        }
+    }
+
+
+    $unique_groups = Array();
+    $helper = Array();
+    # get the unique groups
+    foreach ($groups as $key => $value) {
+        if (array_key_exists($key, $helper)) {
+            continue;
+        }
+        # mark all hosts of this group
+        foreach ($value as $host1 => $host2) {
+            $helper[$host2] = true;
+        }
+        array_push($unique_groups, $value);
+    }
+
+    return $unique_groups;
+}
 
 function get_hostnames($hostnames) {
     $result = Array();
@@ -361,80 +338,3 @@ function get_hostnames($hostnames) {
     }
     return $result;
 }
-
-/** 
- * Apply a user defined function recursively to every member of an array 
- * - Allows the key of an array to be used 
- * @param array $array 
- * @param string userFunction 
- * @param mixed $userData [optional] 
- * @see array_walk_recursive() 
- * @since version 1.0 
- */ 
-function array_walk_recursive_ext(&$input, $userFunction, $userData = null) 
-{ 
-    foreach ($input as $key => $value) 
-    { 
-        if (is_array($value)) 
-        { 
-            /* 
-                call the user function and pass all the arguments 
-                this is what array_walk_recursive() is missing 
-                $value will be an array but we can still use $key 
-                and perhaps you want to do something with each array 
-            */ 
-            call_user_func_array($userFunction, 
-                array( 
-                    $value, $key, $userData 
-                ) 
-            ); 
-            // recuse though the next level 
-            array_walk_recursive_ext($value, $userFunction, $userData); 
-        } 
-        else 
-        { 
-            // call the user function and pass all the arguments 
-            call_user_func_array($userFunction, 
-                array( 
-                    $value, $key, $userData 
-                ) 
-            ); 
-        } 
-    } 
-}  
-
-
-#
-#function longest_common_substring($words)
-#{
-#  $words = array_map('strtolower', array_map('trim', $words));
-#  $sort_by_strlen = create_function('$a, $b', 'if (strlen($a) == strlen($b)) { return strcmp($a, $b); } return (strlen($a) < strlen($b)) ? -1 : 1;');
-#  usort($words, $sort_by_strlen);
-#  // We have to assume that each string has something in common with the first
-#  // string (post sort), we just need to figure out what the longest common
-#  // string is. If any string DOES NOT have something in common with the first
-#  // string, return false.
-#  $longest_common_substring = array();
-#  $shortest_string = str_split(array_shift($words));
-#  while (sizeof($shortest_string)) {
-#    array_unshift($longest_common_substring, '');
-#    foreach ($shortest_string as $ci => $char) {
-#      foreach ($words as $wi => $word) {
-#        if (!strstr($word, $longest_common_substring[0] . $char)) {
-#          // No match
-#          break 2;
-#        } // if
-#      } // foreach
-#      // we found the current char in each word, so add it to the first longest_common_substring element,
-#      // then start checking again using the next char as well
-#      $longest_common_substring[0].= $char;
-#    } // foreach
-#    // We've finished looping through the entire shortest_string.
-#    // Remove the first char and start all over. Do this until there are no more
-#    // chars to search on.
-#    array_shift($shortest_string);
-#  }
-#  // If we made it here then we've run through everything
-#  usort($longest_common_substring, $sort_by_strlen);
-#  return array_pop($longest_common_substring);
-#}
