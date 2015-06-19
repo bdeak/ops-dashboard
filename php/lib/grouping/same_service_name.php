@@ -79,7 +79,7 @@ function do_grouping_same_service_name(&$statuses) {
             $statuses_result["status"][$md5_grouped]["group_size"] = count($group);
             # get the entries for this group
             $entries = get_elements_by_key($statuses["status"], $group);
-            $statuses_result["status"][$md5_grouped]["multiple_subnodes"] = $entries;
+            $statuses_result["status"][$md5_grouped]["group_subnodes"] = $entries;
 
         } else {
             # use the original md5
