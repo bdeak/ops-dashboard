@@ -92,7 +92,7 @@ $(function() {
 			state: state,
 			priority: priority,
 			service_hidden: service_hidden,
-			service: ("service" in object ? object['service'].replace(/^Systemcheck/, "SC:") : null),
+			service: ("service" in object ? object['service'] : null),
 			host: object["host"],
       is_grouped_hidden: is_grouped_hidden,
       group_size: object['group_size'],

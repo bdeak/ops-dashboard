@@ -31,6 +31,8 @@ foreach (glob(dirname(__FILE__)."/../lib/grouping/*.php") as $filename)
     require_once $filename;
 }
 
+require_once(dirname(__FILE__).'/../lib/field_replacements.php');
+
 header('Content-type: application/json');
 
 ###########################################################
@@ -150,6 +152,11 @@ if ($alert_history !== null) {
 			}
 		}
 	}
+}
+
+# do field replacements if enabled
+if ($config["replacements"]["enabled"] === true) {
+	$statuses = do_field_replacements($statuses, $config["replacements"]["patterns"]);
 }
 
 # group the same services on different machines - if needed

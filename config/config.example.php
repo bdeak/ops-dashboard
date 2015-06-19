@@ -56,6 +56,75 @@ $config["sort_age_asc"] = true;
 # when sorting by priorities, should the lowest be first? (prio1 highest)
 $config["sort_priority_asc"] = false;
 #################################################################
+# should be a grouping algoryhtm for services be used?
+$config["grouping"]["service"]["enabled"] = true;
+$config["grouping"]["service"]["method"] = "same_service_name";
+# when grouping services, the should the hostnames be globbed?
+$config["grouping"]["service"]["group_hostname"]["enabled"] = true;
+# how sensitive should the hostname grouping be? (percent)
+$config["grouping"]["service"]["group_hostname"]["tolerance"] = 35;
+# how many hostname patterns to show for grouped tiles?
+$config["grouping"]["service"]["group_hostname"]["limit"] = 2;
+# what hostname to use if either the hostname grouping is disabled or if the differences are too high?
+$config["grouping"]["service"]["group_hostname"]["default"] = "multiple";
+
+# do grouping based on hosts?
+$config["grouping"]["host"]["enabled"] = false;
+$config["grouping"]["host"]["method"] = "same_host_name";
+# the duration of the oldest or the newest member of the group should be shown?
+$config["grouping"]["duration"]["show_newest"] = false;
+##################################################################
+# replace
+# format:
+# $config["replace"]["patterns"] = Array(
+#	Array("field" => "service", "pattern" => /^Something/, "replacement => "somestring"),
+#	Array()...
+#)
+# Always use named groups when grouping (Example4 at http://php.net/manual/en/function.preg-match.php), 
+# the groups are then reachable using %groupname%
+# Example: 	pattern -> "/^Tomcat (?P<type>(memory|threads))"
+# 			replacement -> "TC-%type%"
+# 
+# Additional patterns can also be added to allow matching for text in other fields also.
+# Named groups here are also reachable in the replacement.
+# format:
+#	Array(
+#		"field" => "service",
+#		"pattern" => "/^Tomcat (?P<type>[^\s]+)/i",
+#		"additional_patterns" => Array(
+#			Array(
+#				"field" => "status_information",
+#				"pattern" => "/^check type: (?P<memtype>[^\s]+)/",
+#			),
+#		),
+#		"replacement" => "TC-%type%-%memtype%"
+#	),
+# The replacement is always done in the main field, the additional patterns can only be used for pattern matching
+# usable fields: service, host, status_information, type
+$config["replacements"]["enabled"] = true;
+$config["replacements"]["patterns"] = Array(
+	Array(
+		"field" => "service",
+		"pattern" => "/^Systemcheck/i",
+		"replacement" => "SC:",
+	),
+	Array(
+		"field" => "service",
+		"pattern" => "/^Servercheck (?P<scname>[^\s]+)/i",
+		"additional_patterns" => Array(
+			Array(
+				"field" => "status_information",
+				"pattern" => "/^(?P<pholder>[^\s]+)/",
+			),
+			Array(
+				"field" => "status_information",
+				"pattern" => "/(?P<pholder2>[^\s]+)$/",
+			),			
+		),
+		"replacement" => "SCheck-%scname%-%pholder%: %pholder2%",
+	),	
+);
+##################################################################
 # should alert lookups be enabled?
 # alert lookup is to be used to show as a tag that a given alert has been received by the Operations Center
 # this varies in every setup, so is disabled by default, as no generic lookup method can be written
