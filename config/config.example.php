@@ -68,11 +68,15 @@ $config["grouping"]["service"]["group_hostname"]["limit"] = 2;
 # what hostname to use if either the hostname grouping is disabled or if the differences are too high?
 $config["grouping"]["service"]["group_hostname"]["default"] = "multiple";
 
-# do grouping based on hosts?
-$config["grouping"]["host"]["enabled"] = false;
+# group all services on the same host to one service tile?
+$config["grouping"]["host"]["enabled"] = true;
 $config["grouping"]["host"]["method"] = "same_host_name";
+
 # the duration of the oldest or the newest member of the group should be shown?
 $config["grouping"]["duration"]["show_newest"] = false;
+# should the grouping be done on service name or hostname first?
+# only used if both service and hostname based grouping is enabled
+$config["grouping"]["ordering"]["group_by_service_first"] = false;
 ##################################################################
 # replace
 # format:

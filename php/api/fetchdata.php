@@ -159,30 +159,25 @@ if ($config["replacements"]["enabled"] === true) {
 	$statuses = do_field_replacements($statuses, $config["replacements"]["patterns"]);
 }
 
+
+if ($config["grouping"]["ordering"]["group_by_service_first"] === true) {
+	$grouping_types = Array("service", "host");
+} else {
+	$grouping_types = Array("host", "service");
+}
+
+foreach ($grouping_types as $grouping_type) {
 # group the same services on different machines - if needed
-if ($config["grouping"]["service"]["enabled"] === true) {
-	$grouping_method = $config["grouping"]["service"]["method"];
-	$grouping_func = sprintf("do_grouping_%s", $grouping_method);
-	# check if the given function exists
-	if (! function_exists($grouping_func)) {
-		handle_error("Service grouping function '$grouping_func' is not defined for lookup method '$grouping_method'!");
+	if ($config["grouping"][$grouping_type]["enabled"] === true) {
+		$grouping_method = $config["grouping"][$grouping_type]["method"];
+		$grouping_func = sprintf("do_grouping_%s", $grouping_method);
+		# check if the given function exists
+		if (! function_exists($grouping_func)) {
+			handle_error("'$grouping_type' grouping function '$grouping_func' is not defined for lookup method '$grouping_method'!");
+		}
+		$statuses = call_user_func_array("$grouping_func", Array(&$statuses));
 	}
-	$statuses = call_user_func_array("$grouping_func", Array(&$statuses));
-
 }
-
-# group services of the same host into one check - if needed
-if ($config["grouping"]["host"]["enabled"] === true) {
-	$grouping_method = $config["grouping"]["host"]["method"];
-	$grouping_func = sprintf("do_grouping_%s", $grouping_method);
-	# check if the given function exists
-	if (! function_exists($grouping_func)) {
-		handle_error("Service grouping function '$grouping_func' is not defined for lookup method '$grouping_method'!");
-	}
-	$statuses = call_user_func_array("$grouping_func", Array(&$statuses));
-
-}
-
 
 # sort the statuses hash
 $sort_method_func = sprintf('cmp_%s', $config["sort_method"]);
